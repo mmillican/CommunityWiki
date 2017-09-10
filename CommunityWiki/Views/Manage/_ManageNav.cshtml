@@ -1,5 +1,5 @@
 ﻿@using CommunityWiki.Views.Manage
-@inject SignInManager<ApplicationUser> SignInManager
+@inject SignInManager<CommunityWiki.Entities.Users.User> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
