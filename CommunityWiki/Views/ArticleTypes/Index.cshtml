@@ -1,0 +1,22 @@
+﻿@model CommunityWiki.Models.ArticleTypes.ArticleTypeListViewModel
+@{
+    ViewData["Title"] = "Article types";
+}
+
+@* TODO: only show add/edit if authd *@
+<div class="actions">
+    <a asp-action="Create" class="btn btn-success">New type</a>
+</div>
+
+<div class="article-type-list">
+    @foreach (var type in Model.ArticleTypes)
+    {
+        <div class="article-type">
+            <h3>@type.Name</h3>
+            <p>
+                @type.Description
+            </p>
+            <p><a asp-action="Edit" asp-route-id="@type.Id">Edit</a></p>
+        </div>
+    }
+</div>

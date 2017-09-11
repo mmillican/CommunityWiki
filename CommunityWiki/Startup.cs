@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using CommunityWiki.Data;
 using CommunityWiki.Entities.Users;
 using CommunityWiki.Services;
+using AutoMapper;
+using System.Reflection;
 
 namespace CommunityWiki
 {
@@ -35,6 +37,9 @@ namespace CommunityWiki
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+            var appAssembly = typeof(Startup).GetTypeInfo().Assembly;
+            services.AddAutoMapper(appAssembly);
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
