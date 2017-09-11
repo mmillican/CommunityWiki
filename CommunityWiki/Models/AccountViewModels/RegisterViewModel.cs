@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace CommunityWiki.Models.AccountViewModels
 {
@@ -23,5 +19,13 @@ namespace CommunityWiki.Models.AccountViewModels
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
+        [Required, MaxLength(50)]
+        [Display(Name = "First name")]
+        public string FirstName { get; set; }
+
+        [Required, MaxLength(50)]
+        [Display(Name = "Last name")]
+        public string LastName { get; set; }
     }
 }
