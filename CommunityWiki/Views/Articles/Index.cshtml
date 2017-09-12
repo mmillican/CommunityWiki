@@ -1,0 +1,43 @@
+﻿@model CommunityWiki.Models.Articles.ArticleListViewModel
+@{
+    ViewData["Title"] = "Articles";
+}
+
+@* TODO: only show add/edit if authd *@
+<div class="actions">
+    <a asp-action="Create" class="btn btn-success">New article</a>
+</div>
+
+<div class="article-list">
+    @foreach (var article in Model.Articles)
+    {
+        <div class="article">
+            <h3>
+                <a href="@Url.ViewArticleLink(article.Id, article.Slug)">@article.Title</a>
+            </h3>
+            <p>
+                <ul class="list-inline">
+                    <li><i class="glyphicon glyphicon-file"></i> @article.ArticleTypeName</li>
+                    <li>Updated @article.UpdatedOn.ToString("d")</li>
+                </ul>
+
+                @* TODO: Make a tag helper for labels *@
+                @if (!article.PublishedOn.HasValue)
+                {
+                    <span class="label label-default" title="This article is not published">Not published</span>
+                }
+                @if (article.IsFlaggedForReview)
+                {
+                    <span class="label label-warning" title="This article needs review">Needs review</span>
+                }
+                @if (article.IsFlaggedForDeletion)
+                {
+                    <span class="label label-danger" title="This article is flagged for review">Deletion</span>
+                }
+            </p>
+            <p>
+                <a asp-action="Edit" asp-route-id="@article.Id">Edit</a>
+            </p>
+        </div>
+    }
+</div>

@@ -43,6 +43,7 @@ namespace CommunityWiki
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<IDateTimeService, DateTimeService>();
 
             services.AddMvc();
         }

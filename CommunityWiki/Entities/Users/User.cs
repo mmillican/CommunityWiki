@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
 namespace CommunityWiki.Entities.Users
@@ -10,5 +11,8 @@ namespace CommunityWiki.Entities.Users
 
         [MaxLength(50)]
         public string LastName { get; set; }
+
+        [NotMapped]
+        public string FullName { get { return $"{FirstName} {LastName}"; } }
     }
 }

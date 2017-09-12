@@ -16,7 +16,9 @@
             <p>
                 @type.Description
             </p>
-            <p><a asp-action="Edit" asp-route-id="@type.Id">Edit</a></p>
+            <p>
+                <a asp-action="Edit" asp-route-id="@type.Id">Edit</a> | <a asp-controller="Articles" asp-action="Create" asp-route-typeId="@type.Id">New article</a>
+            </p>
         </div>
     }
 </div>

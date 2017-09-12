@@ -25,5 +25,10 @@ namespace Microsoft.AspNetCore.Mvc
                 values: new { userId, code },
                 protocol: scheme);
         }
+
+        public static string ViewArticleLink(this IUrlHelper urlHelper, int articleId, string slug)
+        {
+            return urlHelper.Action(nameof(ArticlesController.ViewArticle), "Articles", new { id = articleId, slug });
+        }
     }
 }
