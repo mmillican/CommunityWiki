@@ -42,6 +42,8 @@ namespace CommunityWiki.Models
     {
         public static ArticleTypeModel ToModel(this ArticleType type) => Mapper.Map<ArticleTypeModel>(type);
         public static EditArticleTypeViewModel ToEditModel(this ArticleType type) => Mapper.Map<EditArticleTypeViewModel>(type);
+
         public static ArticleViewModel ToViewModel(this Article article) => Mapper.Map<ArticleViewModel>(article);
+        public static EditArticleViewModel ToEditModel(this Article article) => Mapper.Map<EditArticleViewModel>(article);
     }
 }

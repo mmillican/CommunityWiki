@@ -3,7 +3,14 @@
     ViewData["Title"] = Model.Title;
 }
 
+<div class="pull-right">
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+</div>
 
 <div class="article-status-labels">
     <article-status Article="Model" />
+</div>
+
+<div class="article-body">
+    @Html.Raw(Model.Body)
 </div>

@@ -9,6 +9,7 @@ using CommunityWiki.Helpers;
 using CommunityWiki.Models;
 using CommunityWiki.Models.Articles;
 using CommunityWiki.Services;
+using HeyRed.MarkdownSharp;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -62,9 +63,11 @@ namespace CommunityWiki.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var model = article.ToViewModel();
-            //model.ArticleType = 
+            var markdown = new Markdown();
 
+            var model = article.ToViewModel();
+
+            model.Body = markdown.Transform(model.Body);
 
             return View(model);
         }
@@ -123,6 +126,67 @@ namespace CommunityWiki.Controllers
                 _logger.LogError(ex, "Error creating article", model);
 
                 ModelState.AddModelError("", "Error creating article");
+                return View(model);
+            }
+        }
+
+        [HttpGet("edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var article = await _dbContext.Articles.FindAsync(id);
+            if (article == null)
+            {
+                _logger.LogInformation($"EDIT ARTICLE: Article ID {id} not found");
+                return RedirectToAction(nameof(Index));
+            }
+
+            var model = article.ToEditModel();
+
+            return View(model);
+        }
+
+        [HttpPost("edit/{id}")]
+        public async Task<IActionResult> Edit(int id, EditArticleViewModel model)
+        {
+            var user = await GetCurrentUser();
+
+            try
+            {
+                var article = await _dbContext.Articles.FindAsync(id);
+
+                var origTitle = article.Title;
+                article.Title = model.Title;
+                if (article.Title != origTitle)
+                    article.Slug = article.Title.Slugify();
+
+                var origBody = article.Body;
+                article.Body = model.Body;
+                
+                article.UpdatedOn = _dateTimeService.GetNowUtc();
+                article.UpdatedUserId = user.Id;
+
+                article.RevisionCount++;
+
+                var revision = new ArticleRevision
+                {
+                    ArticleId = id,
+                    RevisionDate = _dateTimeService.GetNowUtc(),
+                    Body = origBody,
+                    Score = article.Score,
+                    RevisionUserId = user.Id
+                };
+
+                _dbContext.ArticleRevisions.Add(revision);
+
+                await _dbContext.SaveChangesAsync();
+
+                return Redirect(Url.ViewArticleLink(id, article.Slug));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating article ID {id}", model);
+
+                ModelState.AddModelError("", "Error updating article");
                 return View(model);
             }
         }

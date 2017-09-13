@@ -1,0 +1,34 @@
+﻿@model CommunityWiki.Models.Articles.EditArticleViewModel
+
+@{
+    ViewData["Title"] = "Edit article";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Edit" asp-route-id="@Model.Id">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" placeholder="What is this article about?" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <textarea asp-for="Body" class="form-control" rows="10" placeholder="Describe your @Model.ArticleTypeName with as much detail as possible"></textarea>
+                <span asp-validation-for="Body" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="ArticleTypeId" />
+                <button type="submit" id="btn-save-changes" class="btn btn-primary">Save article</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
