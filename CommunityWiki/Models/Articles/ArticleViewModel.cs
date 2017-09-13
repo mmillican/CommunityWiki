@@ -9,5 +9,7 @@ namespace CommunityWiki.Models.Articles
     public class ArticleViewModel : ArticleModel
     {
         public ArticleTypeModel ArticleType { get; set; }
+
+        public List<ArticleRevisionModel> Revisions { get; set; }
     }
 }

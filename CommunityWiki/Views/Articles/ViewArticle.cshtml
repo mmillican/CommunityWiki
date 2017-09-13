@@ -14,3 +14,26 @@
 <div class="article-body">
     @Html.Raw(Model.Body)
 </div>
+
+@if (Model.Revisions.Any())
+{
+    <h4>Revisions (@Model.RevisionCount)</h4>
+
+    <table class="table table-condensed table-striped revisions">
+        <tr>
+            <th>Date</th>
+            <th>User</th>
+            <th>Score (at rev)</th>
+            <th>Comment</th>
+        </tr>
+        @foreach(var rev in Model.Revisions)
+        {
+            <tr>
+                <td>@rev.RevisionDate.ToString("d")</td>
+                <td>@rev.RevisionUserName</td>
+                <td>@rev.Score</td>
+                <td>@rev.Comment</td>
+            </tr>
+        }
+    </table>
+}

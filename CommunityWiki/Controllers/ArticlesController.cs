@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
@@ -68,6 +69,7 @@ namespace CommunityWiki.Controllers
             var model = article.ToViewModel();
 
             model.Body = markdown.Transform(model.Body);
+            model.Revisions = await BuildArticleRevisionHistory(id);
 
             return View(model);
         }
@@ -189,6 +191,41 @@ namespace CommunityWiki.Controllers
                 ModelState.AddModelError("", "Error updating article");
                 return View(model);
             }
+        }
+
+        private async Task<List<ArticleRevisionModel>> BuildArticleRevisionHistory(int articleId)
+        {
+            var result = new List<ArticleRevisionModel>();
+
+            try
+            {
+                // TODO: query is pulling too many columns back for users
+
+                var revisions = await _dbContext.ArticleRevisions
+                    .Join(_dbContext.Users, x => x.RevisionUserId, x => x.Id, (Revision, User) =>
+                        new { Revision, UserFirstName = User.FirstName, UserLastName = User.LastName })
+                    .Where(x => x.Revision.ArticleId == articleId)
+                    .OrderByDescending(x => x.Revision.RevisionDate)
+                    .ToListAsync();
+
+                result = revisions.Select(x =>
+                {
+                    var rev = x.Revision.ToModel();
+                    rev.RevisionUserName = $"{x.UserFirstName} {x.UserLastName}";
+                    return rev;
+                }).ToList();
+
+                // TODO: compare against previous revision
+
+                return result;
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, $"Error building article revision history for article ID {articleId}");
+            }
+
+
+            return result;
         }
 
         private async Task<User> GetCurrentUser() => await _userManager.GetUserAsync(User);

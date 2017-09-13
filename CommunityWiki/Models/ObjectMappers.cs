@@ -35,6 +35,8 @@ namespace CommunityWiki.Models
             CreateMap<Article, ArticleModel>();
             CreateMap<Article, EditArticleViewModel>();
             CreateMap<Article, ArticleViewModel>();
+
+            CreateMap<ArticleRevision, ArticleRevisionModel>();
         }
     }
 
@@ -45,5 +47,6 @@ namespace CommunityWiki.Models
 
         public static ArticleViewModel ToViewModel(this Article article) => Mapper.Map<ArticleViewModel>(article);
         public static EditArticleViewModel ToEditModel(this Article article) => Mapper.Map<EditArticleViewModel>(article);
+        public static ArticleRevisionModel ToModel(this ArticleRevision revision) => Mapper.Map<ArticleRevisionModel>(revision);
     }
 }
