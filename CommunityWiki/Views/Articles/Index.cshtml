@@ -21,19 +21,8 @@
                     <li>Updated @article.UpdatedOn.ToString("d")</li>
                 </ul>
 
-                @* TODO: Make a tag helper for labels *@
-                @if (!article.PublishedOn.HasValue)
-                {
-                    <span class="label label-default" title="This article is not published">Not published</span>
-                }
-                @if (article.IsFlaggedForReview)
-                {
-                    <span class="label label-warning" title="This article needs review">Needs review</span>
-                }
-                @if (article.IsFlaggedForDeletion)
-                {
-                    <span class="label label-danger" title="This article is flagged for review">Deletion</span>
-                }
+                <article-status article="article"/>
+                
             </p>
             <p>
                 <a asp-action="Edit" asp-route-id="@article.Id">Edit</a>
