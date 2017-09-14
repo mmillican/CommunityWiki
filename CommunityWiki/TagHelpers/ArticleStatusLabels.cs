@@ -17,18 +17,33 @@ namespace CommunityWiki.TagHelpers
             var sb = new StringBuilder();
 
             if (!Article.PublishedOn.HasValue)
-                sb.AppendLine("<span class=\"label label-default\" title=\"This article is not published\">Not published</span>");
+                sb.AppendLine(FormatLabelTag("label-default", "Not published", "This article is not yet published"));
 
             if (Article.IsFlaggedForReview)
-                sb.AppendLine("<span class=\"label label-warning\" title=\"This article is not published\">Needs review</span>");
+                sb.AppendLine(FormatLabelTag("label-warning", "Needs review", "this article needs review"));
 
             if (Article.IsFlaggedForDeletion)
-                sb.Append("<span class=\"label label-danger\" title=\"This article is flagged for review\">Deletion</span>");
+                sb.AppendLine(FormatLabelTag("label-danger", "To delete", "This article is marked for deletion"));
 
             output.Content.SetHtmlContent(sb.ToString());
 
             output.TagName = "";
+        }
 
+        private static string FormatLabelTag(string labelClass, string text, string altText = null)
+        {
+            if (!labelClass.StartsWith("label-"))
+                labelClass = $"label-{labelClass}";
+
+            var sb = new StringBuilder();
+            sb.Append($"<span class=\"label {labelClass}\"");
+
+            if (!string.IsNullOrEmpty(altText))
+                sb.Append($" title=\"{altText}\"");
+
+            sb.Append($">{text}</span>");
+
+            return sb.ToString();
         }
     }
 }
