@@ -1,0 +1,15 @@
+﻿@model CommunityWiki.Models.Articles.CompareRevisionViewModel
+@{
+    ViewData["Title"] = $"Compare {Model.Article.Title}";
+}
+
+<div class="row">
+    <div class="col-md-6 diff-prev">
+        <h4>@Model.Revision.RevisionDate.ToString("d")</h4>
+        @Html.Partial("_DiffPane", Model.DiffModel.OldText)
+    </div>
+    <div class="col-md-6">
+        <h4>Current</h4>
+        @Html.Partial("_DiffPane", Model.DiffModel.NewText)
+    </div>
+</div>

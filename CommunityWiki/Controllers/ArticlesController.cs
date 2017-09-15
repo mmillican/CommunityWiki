@@ -10,6 +10,7 @@ using CommunityWiki.Helpers;
 using CommunityWiki.Models;
 using CommunityWiki.Models.Articles;
 using CommunityWiki.Services;
+using DiffPlex.DiffBuilder;
 using HeyRed.MarkdownSharp;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -24,16 +25,19 @@ namespace CommunityWiki.Controllers
         private readonly UserManager<User> _userManager;
         private readonly ApplicationDbContext _dbContext;
         private readonly IDateTimeService _dateTimeService;
+        private readonly ISideBySideDiffBuilder _diffBuilder;
         private readonly ILogger _logger;
 
         public ArticlesController(UserManager<User> userManager,
             ApplicationDbContext dbContext,
             IDateTimeService dateTimeService,
+            ISideBySideDiffBuilder diffBuilder,
             ILoggerFactory loggerFactory)
         {
             _userManager = userManager;
             _dbContext = dbContext;
             _dateTimeService = dateTimeService;
+            _diffBuilder = diffBuilder;
             _logger = loggerFactory.CreateLogger<ArticlesController>();
         }
 
@@ -70,6 +74,32 @@ namespace CommunityWiki.Controllers
 
             model.Body = markdown.Transform(model.Body);
             model.Revisions = await BuildArticleRevisionHistory(id);
+
+            return View(model);
+        }
+
+        [HttpGet("{articleId}/compare/{revisionId}")]
+        public async Task<IActionResult> CompareRevision(int articleId, int revisionId)
+        {
+            var article = await _dbContext.Articles.FindAsync(articleId);
+            if (article == null)
+            {
+                _logger.LogInformation($"COMPARE: Article ID {articleId} not found");
+                return RedirectToAction(nameof(Index));
+            }
+
+            var revision = await _dbContext.ArticleRevisions.FindAsync(revisionId);
+            if (revision == null || revision.ArticleId != articleId)
+            {
+                _logger.LogInformation($"COMPARE: Revision ID {revisionId} / Article ID {articleId} not found");
+                return RedirectToAction(nameof(Index));
+            }
+
+            var model = new CompareRevisionViewModel();
+            model.Article = article.ToModel();
+            model.Revision = revision.ToModel();
+            
+            model.DiffModel = _diffBuilder.BuildDiffModel(revision.Body, article.Body);
 
             return View(model);
         }

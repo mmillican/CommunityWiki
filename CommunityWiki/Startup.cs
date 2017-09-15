@@ -13,6 +13,8 @@ using CommunityWiki.Entities.Users;
 using CommunityWiki.Services;
 using AutoMapper;
 using System.Reflection;
+using DiffPlex.DiffBuilder;
+using DiffPlex;
 
 namespace CommunityWiki
 {
@@ -44,6 +46,8 @@ namespace CommunityWiki
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<IDateTimeService, DateTimeService>();
+            services.AddTransient<IDiffer, Differ>();
+            services.AddTransient<ISideBySideDiffBuilder, SideBySideDiffBuilder>();
 
             services.AddMvc();
         }

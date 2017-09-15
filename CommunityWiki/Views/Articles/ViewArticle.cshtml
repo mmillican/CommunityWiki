@@ -17,14 +17,16 @@
 
 @if (Model.Revisions.Any())
 {
+    <hr />
     <h4>Revisions (@Model.RevisionCount)</h4>
 
     <table class="table table-condensed table-striped revisions">
         <tr>
-            <th>Date</th>
-            <th>User</th>
-            <th>Score (at rev)</th>
-            <th>Comment</th>
+            <th style="width: 10%">Date</th>
+            <th style="width: 15%">Author</th>
+            <th style="width: 15%">Score (at rev)</th>
+            <th style="width: 50%">Comment</th>
+            <th style="width: 10%"></th>
         </tr>
         @foreach(var rev in Model.Revisions)
         {
@@ -33,6 +35,7 @@
                 <td>@rev.RevisionUserName</td>
                 <td>@rev.Score</td>
                 <td>@rev.Comment</td>
+                <td><a asp-action="CompareRevision" asp-route-articleId="@Model.Id" asp-route-revisionId="@rev.Id">Compare</a></td>
             </tr>
         }
     </table>
