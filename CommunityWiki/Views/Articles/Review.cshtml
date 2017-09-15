@@ -1,0 +1,58 @@
+﻿@model CommunityWiki.Models.Articles.ReviewQueueViewModel
+@{
+    ViewData["Title"] = $"Review queue - {Model.Queue}";
+}
+
+<table class="table table-condensed table-striped table-hover">
+    <tr>
+        <th></th>
+        <th>Title</th>
+        <th>Updated</th>
+    </tr>
+    @foreach(var article in Model.Articles)
+    {
+        <tr>
+            <td class="review-actions">
+                @if (Model.Queue == "publish")
+                {
+                    <button type="button" class="btn btn-default btn-publish" data-article-id="@article.Id">Publish</button><br />
+                    <p id="@($"article-{article.Id}-publish-status")" class="text-muted"></p>
+                }
+            </td>
+            <td>
+                <a href="@Url.ViewArticleLink(article.Id, article.Slug)">@article.Title</a>
+            </td>
+            <td>@article.UpdatedOn.ToString("g")</td>
+        </tr>
+    }
+</table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', '.btn-publish', function (e) {
+                e.preventDefault();
+
+                var $btn = $(this);
+                var articleId = $btn.data('articleId');
+                var $artStatusSpan = $('#article-' + articleId + '-publish-status');
+
+                $btn.attr('disabled', 'disabled');
+
+                $.ajax({
+                    url: '/articles/' + articleId + '/publish',
+                    type: 'POST',
+                    success: function (article) {
+                        $artStatusSpan.removeClass('text-danger').text('published');
+                    },
+                    error: function (jqXhr) {
+                        $btn.removeAttr('disabled');
+
+                        $artStatusSpan.addClass('text-danger').text('Error publishing');
+                    }
+                });
+            });
+        });
+    </script>
+}

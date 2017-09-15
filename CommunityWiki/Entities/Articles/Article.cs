@@ -18,6 +18,7 @@ namespace CommunityWiki.Entities.Articles
         public virtual Article Parent { get; set; }
 
         public DateTime? PublishedOn { get; set; }
+        public int? PublishedUserId { get; set; }
         
         [Required, MaxLength(500)]
         public string Title { get; set; }

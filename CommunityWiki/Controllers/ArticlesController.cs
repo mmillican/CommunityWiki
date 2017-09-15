@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
 using CommunityWiki.Data;
@@ -12,6 +13,7 @@ using CommunityWiki.Models.Articles;
 using CommunityWiki.Services;
 using DiffPlex.DiffBuilder;
 using HeyRed.MarkdownSharp;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +21,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CommunityWiki.Controllers
 {
+    [Authorize]
     [Route("articles")]
     public class ArticlesController : Controller
     {
@@ -62,7 +65,7 @@ namespace CommunityWiki.Controllers
         public async Task<IActionResult> ViewArticle(int id, string slug)
         {
             var article = await _dbContext.Articles.FindAsync(id);
-            if (article == null)
+            if (article == null || article.DeletedOn.HasValue)
             {
                 _logger.LogInformation($"Article ID {id} not found (SLUG: {slug})");
                 return RedirectToAction(nameof(Index));
@@ -166,7 +169,7 @@ namespace CommunityWiki.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var article = await _dbContext.Articles.FindAsync(id);
-            if (article == null)
+            if (article == null || article.DeletedOn.HasValue)
             {
                 _logger.LogInformation($"EDIT ARTICLE: Article ID {id} not found");
                 return RedirectToAction(nameof(Index));
@@ -220,6 +223,83 @@ namespace CommunityWiki.Controllers
 
                 ModelState.AddModelError("", "Error updating article");
                 return View(model);
+            }
+        }
+
+        [HttpGet("review/{queue=publish}")]
+        public async Task<IActionResult> Review(string queue)
+        {
+            IQueryable<Article> articleQuery = _dbContext.Articles;
+
+            switch (queue)
+            {
+                case "publish":
+                    articleQuery = articleQuery.Where(x => !x.PublishedOn.HasValue).OrderBy(x => x.UpdatedOn);
+                    break;
+            }
+
+            var model = new ReviewQueueViewModel();
+            model.Queue = queue;
+            model.Articles = await articleQuery.ProjectTo<ArticleModel>().ToListAsync();
+
+            return View(model);
+        }
+
+        [HttpPost("{articleId}/publish")]
+        public async Task<IActionResult> Publish(int articleId)
+        {
+            var article = await _dbContext.Articles.FindAsync(articleId);
+            if (article == null)
+                return NotFound();
+
+            if (article.PublishedOn.HasValue)
+                return BadRequest("Article is already published");
+
+            // TODO: auth user
+            var user = await GetCurrentUser();
+
+            try
+            {
+                article.PublishedOn = _dateTimeService.GetNowUtc();
+                article.PublishedUserId = user.Id;
+
+                await _dbContext.SaveChangesAsync();
+
+                var model = article.ToModel();
+                return Ok(model);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, $"Error publishing article {articleId}");
+
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Error publishing article");
+            }
+        }
+
+        [HttpPost("delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var article = await _dbContext.Articles.FindAsync(id);
+            if (article == null || article.DeletedOn.HasValue)
+                return NotFound();
+            
+            try
+            {
+                var user = await GetCurrentUser();
+
+                article.DeletedOn = _dateTimeService.GetNowUtc();
+                article.DeletedUserId = user.Id;
+
+                await _dbContext.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting article {id}");
+
+                // TODO: show more friendly error
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Error deleting article");
             }
         }
 
