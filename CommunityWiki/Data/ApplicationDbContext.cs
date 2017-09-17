@@ -12,6 +12,7 @@ namespace CommunityWiki.Data
         public DbSet<FieldDefinition> ArticleTypeFieldDefinitions { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<ArticleRevision> ArticleRevisions { get; set; }
+        public DbSet<Vote> Votes { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

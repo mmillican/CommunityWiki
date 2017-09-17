@@ -12,9 +12,10 @@ using System;
 namespace CommunityWiki.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170915043301_CreateArticleVotesTable")]
+    partial class CreateArticleVotesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,6 +123,26 @@ namespace CommunityWiki.Migrations
                     b.ToTable("ArticleTypes");
                 });
 
+            modelBuilder.Entity("CommunityWiki.Entities.Articles.ArticleVote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("ArticleId");
+
+                    b.Property<int>("UserId");
+
+                    b.Property<int>("VoteType");
+
+                    b.Property<DateTime>("VotedOn");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId");
+
+                    b.ToTable("ArticleVotes");
+                });
+
             modelBuilder.Entity("CommunityWiki.Entities.Articles.FieldDefinition", b =>
                 {
                     b.Property<int>("Id")
@@ -149,26 +170,6 @@ namespace CommunityWiki.Migrations
                     b.HasIndex("ArticleTypeId");
 
                     b.ToTable("ArticleTypeFieldDefinitions");
-                });
-
-            modelBuilder.Entity("CommunityWiki.Entities.Articles.Vote", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("ArticleId");
-
-                    b.Property<int>("UserId");
-
-                    b.Property<int>("VoteType");
-
-                    b.Property<DateTime>("VotedOn");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ArticleId");
-
-                    b.ToTable("Votes");
                 });
 
             modelBuilder.Entity("CommunityWiki.Entities.Users.Role", b =>
@@ -353,19 +354,19 @@ namespace CommunityWiki.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("CommunityWiki.Entities.Articles.ArticleVote", b =>
+                {
+                    b.HasOne("CommunityWiki.Entities.Articles.Article", "Article")
+                        .WithMany()
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("CommunityWiki.Entities.Articles.FieldDefinition", b =>
                 {
                     b.HasOne("CommunityWiki.Entities.Articles.ArticleType", "ArticleType")
                         .WithMany("Fields")
                         .HasForeignKey("ArticleTypeId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("CommunityWiki.Entities.Articles.Vote", b =>
-                {
-                    b.HasOne("CommunityWiki.Entities.Articles.Article", "Article")
-                        .WithMany()
-                        .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

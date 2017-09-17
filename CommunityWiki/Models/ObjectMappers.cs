@@ -2,6 +2,7 @@
 using CommunityWiki.Entities.Articles;
 using CommunityWiki.Models.Articles;
 using CommunityWiki.Models.ArticleTypes;
+using CommunityWiki.Models.Votes;
 
 namespace CommunityWiki.Models
 {
@@ -37,6 +38,8 @@ namespace CommunityWiki.Models
             CreateMap<Article, ArticleViewModel>();
 
             CreateMap<ArticleRevision, ArticleRevisionModel>();
+
+            CreateMap<Vote, VoteModel>();
         }
     }
 

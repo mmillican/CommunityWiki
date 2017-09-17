@@ -46,6 +46,7 @@ namespace CommunityWiki
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<IDateTimeService, DateTimeService>();
+            services.AddTransient<IVoteService, VoteService>();
             services.AddTransient<IDiffer, Differ>();
             services.AddTransient<ISideBySideDiffBuilder, SideBySideDiffBuilder>();
 
