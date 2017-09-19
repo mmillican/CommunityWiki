@@ -1,4 +1,6 @@
 ﻿using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace CommunityWiki.Helpers
 {
@@ -20,6 +22,21 @@ namespace CommunityWiki.Helpers
             }
 
             return cleaned;
+        }
+
+        public static string Serialize(this object data, bool camelCaseProps = true)
+        {
+            if (camelCaseProps)
+            {
+                var settings = new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                };
+
+                return JsonConvert.SerializeObject(data, settings);
+            }
+
+            return JsonConvert.SerializeObject(data);
         }
     }
 }

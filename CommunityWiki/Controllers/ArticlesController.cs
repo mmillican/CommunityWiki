@@ -10,6 +10,7 @@ using CommunityWiki.Entities.Users;
 using CommunityWiki.Helpers;
 using CommunityWiki.Models;
 using CommunityWiki.Models.Articles;
+using CommunityWiki.Models.Votes;
 using CommunityWiki.Services;
 using DiffPlex.DiffBuilder;
 using HeyRed.MarkdownSharp;
@@ -28,18 +29,21 @@ namespace CommunityWiki.Controllers
         private readonly UserManager<User> _userManager;
         private readonly ApplicationDbContext _dbContext;
         private readonly IDateTimeService _dateTimeService;
+        private readonly IVoteService _voteService;
         private readonly ISideBySideDiffBuilder _diffBuilder;
         private readonly ILogger _logger;
 
         public ArticlesController(UserManager<User> userManager,
             ApplicationDbContext dbContext,
             IDateTimeService dateTimeService,
+            IVoteService voteService,
             ISideBySideDiffBuilder diffBuilder,
             ILoggerFactory loggerFactory)
         {
             _userManager = userManager;
             _dbContext = dbContext;
             _dateTimeService = dateTimeService;
+            _voteService = voteService;
             _diffBuilder = diffBuilder;
             _logger = loggerFactory.CreateLogger<ArticlesController>();
         }
@@ -71,12 +75,22 @@ namespace CommunityWiki.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var user = await GetCurrentUser();
+
             var markdown = new Markdown();
 
             var model = article.ToViewModel();
 
             model.Body = markdown.Transform(model.Body);
             model.Revisions = await BuildArticleRevisionHistory(id);
+
+            var articleVotes = await _voteService.GetVotesForArticle(id);
+
+            model.Voting.UserCanVote = user != null;
+            model.Voting.UserHasUpVoted = articleVotes.Any(x => x.UserId == user.Id && x.VoteType == VoteType.UpVote);
+            model.Voting.UserHasDownVoted = articleVotes.Any(x => x.UserId == user.Id && x.VoteType == VoteType.DownVote);
+            model.Voting.UpVoteCount = articleVotes.Count(x => x.VoteType == VoteType.UpVote);
+            model.Voting.DownVoteCount = articleVotes.Count(x => x.VoteType == VoteType.DownVote);
 
             return View(model);
         }

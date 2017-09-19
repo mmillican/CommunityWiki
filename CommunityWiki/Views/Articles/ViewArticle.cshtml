@@ -6,6 +6,29 @@
 <div class="pull-right">
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
 </div>
+<div class="clearfix"></div>
+
+<div class="article-voting">
+    <ul class="list-inline">
+        <li>
+            <h3 class="article-score">@Model.Score</h3>
+        </li>
+        <li>
+            <h4>
+                <a href="#" class="btn-vote vote-up" data-vote-type="UpVote">
+                    <span class="glyphicon glyphicon-thumbs-up @(Model.Voting.UserHasUpVoted ? "voted text-success" : "")"></span>
+                </a>
+            </h4>
+        </li>
+        <li>
+            <h4>
+                <a href="#" class="btn-vote vote-down" data-vote-type="DownVote">
+                    <span class="glyphicon glyphicon-thumbs-down @(Model.Voting.UserHasDownVoted ? "voted text-danger" : "")"></span>
+                </a>
+            </h4>
+        </li>
+    </ul>
+</div>
 
 <div class="article-status-labels">
     <article-status Article="Model" />
@@ -52,6 +75,64 @@
             $('.btn-delete-article').on('click', function (e) {
                 if (!confirm('Are you sure you want to delete this article?')) {
                     e.preventDefault();
+                }
+            });
+
+            var votingData = @(Html.Raw(Model.Voting.Serialize()));
+
+            $(document).on('click', '.btn-vote', function (e) {
+                e.preventDefault();
+
+                if (!votingData.userCanVote) {
+                    return;
+                }
+
+                var $btn = $(this),
+                    $btnIcon = $(this).find('.glyphicon'),
+                    $spnArticleScore = $('.article-score'),
+                    voteType = $btn.data('voteType');
+
+                if (!votingData.userHasVoted) {
+                    var data = {
+                        articleId: @Model.Id,
+                        voteType: voteType
+                    };
+
+                    $.ajax({
+                        url: '@Url.Action("Create", "Votes")',
+                        type: 'POST',
+                        data: data,
+                        success: function (result) {
+                            $spnArticleScore.text(result.score);
+                            votingData.userHasVoted = true;
+
+                            if (voteType === 'UpVote') {
+                                $btnIcon.addClass('text-success');
+                                votingData.userHasUpVoted = true;
+                            } else if(voteType === 'DownVote'){
+                                $btnIcon.addClass('text-danger');
+                                votingData.userHasDownVoted = true;
+                            }
+                        }
+                    });
+                } else if ((voteType === 'UpVote' && votingData.userHasUpVoted) || (voteType === 'DownVote' && votingData.userHasDownVoted)) {
+                    $.ajax({
+                        url: '@Url.Action("Delete", "Votes")',
+                        type: 'DELETE',
+                        data: {
+                            articleId: @Model.Id,
+                            voteType: voteType
+                        },
+                        success: function (result) {
+                            console.log(result);
+                            $btnIcon.removeClass('text-success text-danger');
+                            $spnArticleScore.text(result.score);
+                            votingData.userHasVoted = false;
+                            votingData.userHasUpVoted = false;
+                            votingData.userHasDownVoted = false;
+                        }
+
+                    })
                 }
             });
         });

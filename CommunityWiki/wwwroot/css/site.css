@@ -26,6 +26,13 @@
     margin: 15px;
 }
 
+.article-voting .user-can-vote {
+    cursor: pointer;
+}
+.btn-vote:hover, .btn-vote:active {
+    text-decoration: none; 
+}
+
 /* Hide/rearrange for smaller screens */
 @media screen and (max-width: 767px) {
     /* Hide captions */

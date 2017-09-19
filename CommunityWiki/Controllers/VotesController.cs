@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using CommunityWiki.Data;
 using CommunityWiki.Entities.Articles;
 using CommunityWiki.Entities.Users;
 using CommunityWiki.Models.Votes;
@@ -15,16 +16,19 @@ namespace CommunityWiki.Controllers
     public class VotesController : Controller
     {
         private readonly UserManager<User> _userManager;
+        private readonly ApplicationDbContext _dbContext;
         private readonly IVoteService _voteService;
         private readonly IDateTimeService _dateTimeService;
         private readonly ILogger _logger;
         
         public VotesController(UserManager<User> userManager,
+            ApplicationDbContext dbContext,
             IVoteService voteService,
             IDateTimeService dateTimeService,
             ILoggerFactory loggerFactory)
         {
             _userManager = userManager;
+            _dbContext = dbContext;
             _voteService = voteService;
             _dateTimeService = dateTimeService;
             _logger = loggerFactory.CreateLogger<VotesController>();
@@ -50,8 +54,18 @@ namespace CommunityWiki.Controllers
 
                 vote = await _voteService.CreateVote(vote);
 
-                model = vote.ToModel();
-                return Created("", model);
+                var artVoteCount = await GetVoteCountForArticle(model.ArticleId, model.VoteType);
+                var score = (await _dbContext.Articles.FindAsync(model.ArticleId))?.Score;
+
+                var voteResultModel = new
+                {
+                    model.ArticleId,
+                    model.VoteType,
+                    VoteCount = artVoteCount,
+                    Score = score
+                };
+
+                return Created("", voteResultModel);
             }
             catch (ApplicationException ex) when (ex.Message == "Article does not exist")
             {
@@ -70,6 +84,56 @@ namespace CommunityWiki.Controllers
 
                 return StatusCode((int)HttpStatusCode.InternalServerError, "Error creating vote");
             }
+        }
+
+        [HttpDelete("")]
+        public async Task<IActionResult> Delete(VoteModel model)
+        {
+            try
+            {
+                var user = await GetCurrentUser();
+
+                Vote vote;
+                if (model.Id != 0)
+                    vote = await _voteService.GetVote(model.Id);
+                else
+                    vote = await _voteService.GetUserVoteForArticle(user.Id, model.ArticleId, model.VoteType);
+
+                if (vote == null)
+                {
+                    _logger.LogInformation("Vote not found");
+                    return NotFound("Vote not found");
+                }
+
+                _dbContext.Votes.Remove(vote);
+                await _dbContext.SaveChangesAsync();
+                await _voteService.UpdateArticleScore(model.ArticleId);
+
+                var artVoteCount = await GetVoteCountForArticle(model.ArticleId, model.VoteType);
+                var score = (await _dbContext.Articles.FindAsync(model.ArticleId))?.Score;
+
+                var voteResultModel = new
+                {
+                    model.ArticleId,
+                    model.VoteType,
+                    VoteCount = artVoteCount,
+                    Score = score
+                };
+
+                return Ok(voteResultModel);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting vote", model);
+
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Error deleting vote");
+            }
+        }
+
+        private async Task<int> GetVoteCountForArticle(int articleId, VoteType type)
+        {
+            var count = await _voteService.GetVoteCountForArticle(articleId, type);
+            return count;
         }
 
         private async Task<User> GetCurrentUser() => await _userManager.GetUserAsync(User);
