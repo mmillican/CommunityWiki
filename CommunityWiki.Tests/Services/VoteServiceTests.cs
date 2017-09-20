@@ -99,6 +99,23 @@ namespace CommunityWiki.Tests.Services
         }
 
         [Fact]
+        public async Task GetUserVotesForArticle_NoVotesForArticle_ReturnsEmpty()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                testContext.Votes.Add(new Vote { Id = 1, ArticleId = 2, UserId = 2 });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                var votes = await voteService.GetUserVotesForArticle(1, 1);
+                Assert.NotNull(votes);
+                Assert.Equal(0, votes.Count);
+            }
+        }
+
+        [Fact]
         public async Task GetUserVotesForArticle_VotesForUser_ReturnsVotes()
         {
             using (var testContext = GetTestDbContext())
@@ -148,11 +165,220 @@ namespace CommunityWiki.Tests.Services
 
                 var voteService = new VoteService(testContext);
 
-                var vote = await voteService.GetUserVoteForArticle(2, 1, VoteType.UpVote);
+                var vote = await voteService.GetUserVoteForArticle(1, 1, VoteType.UpVote);
                 Assert.Null(vote);
             }
         }
 
+        [Fact]
+        public async Task GetUserVoteForArticle_NoVoteOfType_ReturnsNull()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                testContext.Votes.Add(new Vote { Id = 1, ArticleId = 1, UserId = 2, VoteType = VoteType.UpVote });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                var vote = await voteService.GetUserVoteForArticle(2, 1, VoteType.DownVote);
+                Assert.Null(vote);
+            }
+        }
+
+        [Fact]
+        public async Task GetUserVoteForArticle_Found_ReturnsVote()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                testContext.Votes.Add(new Vote { Id = 1, ArticleId = 1, UserId = 2, VoteType = VoteType.UpVote });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                var vote = await voteService.GetUserVoteForArticle(2, 1, VoteType.UpVote);
+                Assert.NotNull(vote);
+                Assert.Equal(1, vote.Id);
+                Assert.Equal(1, vote.ArticleId);
+                Assert.Equal(2, vote.UserId);
+                Assert.Equal(VoteType.UpVote, vote.VoteType);
+            }
+        }
+
+        [Fact]
+        public async Task GetVoteCountForArticle_NoTypeSpecified_NoVotes_ReturnsZero()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                var voteCount = await voteService.GetVoteCountForArticle(1, null);
+                Assert.NotNull(voteCount);
+                Assert.Equal(0, voteCount);
+            }
+        }
+
+        [Fact]
+        public async Task GetVoteCountForArticle_TypeSpecified_NoVotes_ReturnsZero()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                var voteCount = await voteService.GetVoteCountForArticle(1, VoteType.UpVote);
+                Assert.NotNull(voteCount);
+                Assert.Equal(0, voteCount);
+            }
+        }
+
+        [Fact]
+        public async Task GetVoteCountForArticle_NoVotesForType_ReturnsZero()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                testContext.Votes.Add(new Vote { Id = 1, ArticleId = 1, UserId = 2, VoteType = VoteType.UpVote });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                var voteCount = await voteService.GetVoteCountForArticle(1, VoteType.DownVote);
+                Assert.NotNull(voteCount);
+                Assert.Equal(0, voteCount);
+            }
+        }
+
+        [Fact]
+        public async Task GetVoteCountForArticle_MultipleVoteTypes_ReturnsCount()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                testContext.Votes.Add(new Vote { Id = 1, ArticleId = 1, UserId = 2, VoteType = VoteType.UpVote });
+                testContext.Votes.Add(new Vote { Id = 2, ArticleId = 1, UserId = 3, VoteType = VoteType.DownVote });
+                testContext.Votes.Add(new Vote { Id = 3, ArticleId = 1, UserId = 4, VoteType = VoteType.UpVote });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                var voteCount = await voteService.GetVoteCountForArticle(1, VoteType.UpVote);
+                Assert.NotNull(voteCount);
+                Assert.Equal(2, voteCount);
+
+                voteCount = await voteService.GetVoteCountForArticle(1, VoteType.DownVote);
+                Assert.NotNull(voteCount);
+                Assert.Equal(1, voteCount);
+            }
+        }
+
+        [Fact]
+        public async Task UpdateArticleScore_NoVotes_EqualsZero()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+                
+                await voteService.UpdateArticleScore(1);
+
+                var updatedArticle = await testContext.Articles.FindAsync(1);
+                Assert.NotNull(updatedArticle);
+                Assert.Equal(0, updatedArticle.Score);
+            }
+        }
+
+        [Fact]
+        public async Task UpdateArticleScore_SingleUpVote_EqualsOne()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                testContext.Votes.Add(new Vote { Id = 1, ArticleId = 1, UserId = 2, VoteType = VoteType.UpVote });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                await voteService.UpdateArticleScore(1);
+
+                var updatedArticle = await testContext.Articles.FindAsync(1);
+                Assert.NotNull(updatedArticle);
+                Assert.Equal(1, updatedArticle.Score);
+            }
+        }
+
+        [Fact]
+        public async Task UpdateArticleScore_SingleDownVote_EqualsNegOne()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                testContext.Votes.Add(new Vote { Id = 1, ArticleId = 1, UserId = 2, VoteType = VoteType.DownVote });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                await voteService.UpdateArticleScore(1);
+
+                var updatedArticle = await testContext.Articles.FindAsync(1);
+                Assert.NotNull(updatedArticle);
+                Assert.Equal(-1, updatedArticle.Score);
+            }
+        }
+        
+        [Fact]
+        public async Task UpdateArticleScore_OneUpAndDownVote_EqualsZero()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                testContext.Votes.Add(new Vote { Id = 1, ArticleId = 1, UserId = 2, VoteType = VoteType.UpVote });
+                testContext.Votes.Add(new Vote { Id = 2, ArticleId = 1, UserId = 5, VoteType = VoteType.DownVote });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                await voteService.UpdateArticleScore(1);
+
+                var updatedArticle = await testContext.Articles.FindAsync(1);
+                Assert.NotNull(updatedArticle);
+                Assert.Equal(0, updatedArticle.Score);
+            }
+        }
+
+        [Fact]
+        public async Task UpdateArticleScore_ThreeUpAndDownVote_EqualsTwo()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                testContext.Votes.Add(new Vote { Id = 1, ArticleId = 1, UserId = 2, VoteType = VoteType.UpVote });
+                testContext.Votes.Add(new Vote { Id = 2, ArticleId = 1, UserId = 4, VoteType = VoteType.DownVote });
+                testContext.Votes.Add(new Vote { Id = 4, ArticleId = 1, UserId = 6, VoteType = VoteType.UpVote });
+                testContext.Votes.Add(new Vote { Id = 6, ArticleId = 1, UserId = 7, VoteType = VoteType.UpVote });
+
+                // Add a vote from another article
+                testContext.Votes.Add(new Vote { Id = 10, ArticleId = 2, UserId = 2, VoteType = VoteType.UpVote });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                await voteService.UpdateArticleScore(1);
+
+                var updatedArticle = await testContext.Articles.FindAsync(1);
+                Assert.NotNull(updatedArticle);
+                Assert.Equal(2, updatedArticle.Score);
+            }
+        }
+        
         private ApplicationDbContext GetTestDbContext()
         {
             var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()

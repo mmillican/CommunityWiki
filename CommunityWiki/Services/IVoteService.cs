@@ -63,7 +63,7 @@ namespace CommunityWiki.Services
         {
             var vote = await _dbContext.Votes.FirstOrDefaultAsync(x =>
                 x.UserId == userId
-                && x.ArticleId == userId
+                && x.ArticleId == articleId
                 && x.VoteType == type);
 
             return vote;
