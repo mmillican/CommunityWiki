@@ -24,8 +24,12 @@ namespace CommunityWiki.Services
     public class VoteService : IVoteService
     {
         private static readonly List<VoteType> _allowsMultipleVotesTypes = new List<VoteType> {
-            VoteType.NeedsReview,
-            VoteType.Deletion
+            VoteType.InvalidSources,
+            VoteType.Plagiarism,
+            VoteType.NotHelpful,
+            VoteType.Offensive,
+            VoteType.Spam,
+            VoteType.NeedsReview
         };
 
         private readonly ApplicationDbContext _dbContext;

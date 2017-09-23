@@ -24,6 +24,11 @@ namespace CommunityWiki.Entities.Articles
     {
         DownVote = -1,
         UpVote = 1,
+        InvalidSources = 5,
+        Plagiarism = 6,
+        NotHelpful = 7,
+        Offensive = 8,
+        Spam = 9,
         NeedsReview = 10,
         Deletion = 20
     }

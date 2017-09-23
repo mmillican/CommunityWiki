@@ -33,6 +33,11 @@
     text-decoration: none; 
 }
 
+ul.article-flag-options li { margin-bottom: 10px; }
+ul.article-flag-options li label.flag-reason { margin-bottom: 0; font-weight: bold; }
+ul.article-flag-options li .flag-description { margin-left: 17px; }
+
+
 /* Hide/rearrange for smaller screens */
 @media screen and (max-width: 767px) {
     /* Hide captions */
