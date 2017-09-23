@@ -1,4 +1,57 @@
-﻿
+﻿var wiki = wiki || {};
+
+wiki.notices = (function () {
+    var _notices = [];
+
+    var _noticeContainer = $('.page-notices');
+    var _noticeTemplate = _.template('<div class="alert <%= type %>"><%= message %></div>');
+
+    var _addInfo = function (message, container, timeout) {
+        _addNotice('alert-info', message, container, timeout);
+    };
+
+    var _addSuccess = function (message, container, timeout) {
+        _addNotice('alert-success', message, container, timeout);
+    };
+
+    var _addWarning = function (message, container, timeout) {
+        _addNotice('alert-warning', message, container, timeout);
+    };
+
+    var _addError = function (message, container, timeout) {
+        _addNotice('alert-danger', message, container, timeout);
+    };
+
+    var _addNotice = function (type, message, container, timeout) {
+        var notice = {
+            type: type,
+            message: message
+        };
+
+        if (!timeout) {
+            timeout = 3000;
+        }
+
+        var targetContainer = container || _noticeContainer;
+        var noticeElement = $(_noticeTemplate(notice));
+        targetContainer.append(noticeElement);
+
+        if (timeout > 0) {
+            window.setTimeout(function () {
+                noticeElement.fadeOut();
+            }, timeout);
+        }
+
+        _notices.push(notice);
+    };
+
+    return {
+        addInfo: _addInfo,
+        addSuccess: _addSuccess,
+        addWarning: _addWarning,
+        addError: _addError
+    };
+}());
 
 function InitializeDiffPanes() {
     var diffBox = $("#diffBox");
