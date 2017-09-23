@@ -379,6 +379,120 @@ namespace CommunityWiki.Tests.Services
             }
         }
         
+        [Fact]
+        public async Task CreateVote_NullVote_ThrowsException()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                var voteService = new VoteService(testContext);
+                
+                await Assert.ThrowsAsync<ArgumentNullException>(() => voteService.CreateVote(null));
+            }
+        }
+
+        [Fact]
+        public async Task CreateVote_ArticleNotFound_ThrowsException()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                var voteService = new VoteService(testContext);
+
+                var vote = new Vote
+                {
+                    ArticleId = 1
+                };
+
+                await Assert.ThrowsAsync<ApplicationException>(() => voteService.CreateVote(vote));
+            }
+        }
+
+
+        [Fact]
+        public async Task CreateVote_VoteTypeDoesNotAllowMultiple_UserVoted_ThrowsException()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                testContext.Votes.Add(new Vote { Id = 1, ArticleId = 1, UserId = 1, VoteType = VoteType.UpVote });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                var vote = new Vote
+                {
+                    Id = 2,
+                    ArticleId = 1,
+                    UserId = 1,
+                    VoteType = VoteType.UpVote
+                };
+
+                await Assert.ThrowsAsync<ApplicationException>(() => voteService.CreateVote(vote));                
+            }
+        }
+
+        [Fact]
+        public async Task CreateVote_VoteTypeDoesNotAllowMultiple_UserDidNotVote_CreatesVote()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                var vote = new Vote
+                {
+                    Id = 1,
+                    ArticleId = 1,
+                    UserId = 1,
+                    VoteType = VoteType.UpVote
+                };
+
+                await voteService.CreateVote(vote);
+
+                Assert.Equal(1, testContext.Votes.Count());
+
+                var savedVote = await testContext.Votes.FindAsync(vote.Id);
+                Assert.NotNull(savedVote);
+
+                var article = await testContext.Articles.FindAsync(vote.ArticleId);
+                Assert.NotNull(article);
+                Assert.Equal(1, article.Score);
+            }
+        }
+
+        [Fact]
+        public async Task CreateVote_VoteTypeAllowsMulitple_UserVoted_CreatesVote()
+        {
+            using (var testContext = GetTestDbContext())
+            {
+                testContext.Articles.Add(new Article { Id = 1, Title = "Test Article", Slug = "test-article" });
+                testContext.Votes.Add(new Vote { Id = 1, ArticleId = 1, UserId = 1, VoteType = VoteType.UpVote });
+                await testContext.SaveChangesAsync();
+
+                var voteService = new VoteService(testContext);
+
+                var vote = new Vote
+                {
+                    Id = 2,
+                    ArticleId = 1,
+                    UserId = 1,
+                    VoteType = VoteType.NeedsReview
+                };
+
+                await voteService.CreateVote(vote);
+
+                Assert.Equal(2, testContext.Votes.Count());
+
+                var savedVote = await testContext.Votes.FindAsync(vote.Id);
+                Assert.NotNull(savedVote);
+
+                var article = await testContext.Articles.FindAsync(vote.ArticleId);
+                Assert.NotNull(article);
+                Assert.Equal(1, article.Score); // Score should not change
+            }
+        }
+
         private ApplicationDbContext GetTestDbContext()
         {
             var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
