@@ -1,0 +1,19 @@
+﻿.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+header {
+    .search-form { 
+        text-align: right;
+        padding-top: 20px;
+    }
+}
+
+footer#footer {
+    height: 100px;
+    padding: $padding-large-vertical*2 0;
+    margin-top: $padding-large-vertical;    
+    background-color: $gray-dark;
+    color: $gray-lighter;
+}

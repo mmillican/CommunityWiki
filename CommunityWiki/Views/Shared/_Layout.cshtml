@@ -21,8 +21,13 @@
         <div class="header">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-3 col-sm-6 col-xs-6">
+                    <div class="col-md-6 col-sm-8">
                         <h1>Community Wiki</h1>
+                    </div>
+                    <div class="col-md-6 col-sm-4">
+                        <form method="get" asp-controller="Search" asp-action="Index" class="search-form visible-lg visible-md visible-sm form-inline">
+                            <input type="text" name="search" class="form-control" placeholder="search..." />
+                        </form>
                     </div>
                 </div>
             </div>
@@ -41,6 +46,11 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
+                    <li class="nav-search visible-xs">
+                        <form class="search-form form-inline">
+                            <input type="text" name="search" class="form-control" placeholder="search..." />
+                        </form>
+                    </li>
                     <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
                     <li><a asp-area="" asp-controller="ArticleTypes" asp-action="Index">Article types</a></li>
                     <li><a asp-area="" asp-controller="Articles" asp-action="Index">Articles</a></li>
@@ -57,11 +67,17 @@
         <div class="page-notices"></div>
 
         @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; 2017 - CommunityWiki</p>
-        </footer>
     </div>
+
+    <footer id="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">&copy; @DateTime.Now.Year Community Wiki.  An InternetMill project.</div>
+                <div class="col-md-4"></div>
+                <div class="col-md-4"></div>
+            </div>
+        </div>
+    </footer>
 
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
