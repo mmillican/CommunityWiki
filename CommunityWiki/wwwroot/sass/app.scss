@@ -1,1 +1,58 @@
 ﻿@import "bootstrap";
+
+body {
+    padding-bottom: 20px;
+}
+
+/* Wrapping element */
+/* Set some basic padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Carousel */
+.carousel-caption p {
+    font-size: 20px;
+    line-height: 1.4;
+}
+
+/* Make .svg files in the carousel display properly in older browsers */
+.carousel-inner .item img[src$=".svg"] {
+    width: 100%;
+}
+
+/* QR code generator */
+#qrCode {
+    margin: 15px;
+}
+
+.article-voting .user-can-vote {
+    cursor: pointer;
+}
+
+.btn-vote:hover, .btn-vote:active {
+    text-decoration: none;
+}
+
+ul.article-flag-options li {
+    margin-bottom: 10px;
+}
+
+ul.article-flag-options li label.flag-reason {
+    margin-bottom: 0;
+    font-weight: bold;
+}
+
+ul.article-flag-options li .flag-description {
+    margin-left: 17px;
+}
+
+
+/* Hide/rearrange for smaller screens */
+@media screen and (max-width: 767px) {
+    /* Hide captions */
+    .carousel-caption {
+        display: none;
+    }
+}
