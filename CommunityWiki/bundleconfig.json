@@ -1,8 +1,8 @@
 ﻿[
   {
-    "outputFileName": "wwwroot/css/site.min.css",
+    "outputFileName": "wwwroot/css/app.min.css",
     "inputFiles": [
-      "wwwroot/css/site.css",
+      "wwwroot/css/app.css",
       "wwwroot/css/diff.css"
     ]
   },

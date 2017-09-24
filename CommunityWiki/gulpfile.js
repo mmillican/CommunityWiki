@@ -4,6 +4,7 @@ var gulp = require("gulp"),
     concat = require("gulp-concat"),
     cssmin = require("gulp-cssmin"),
     uglify = require("gulp-uglify"),
+    sass = require("gulp-sass"),
     merge = require("merge-stream"),
     del = require("del"),
     bundleconfig = require("./bundleconfig.json");
@@ -14,6 +15,15 @@ var regex = {
 };
 
 gulp.task("min", ["min:js", "min:css"]);
+
+gulp.task('sass', function () {
+    return gulp.src('wwwroot/sass/**/*.scss')
+        .pipe(sass({
+            outputStyle: 'expanded'
+        }).on('error', sass.logError))
+        //.pipe(prefix())
+        .pipe(gulp.dest('wwwroot/css'));
+});
 
 gulp.task("min:js", function () {
     var tasks = getBundles(regex.js).map(function (bundle) {
@@ -48,9 +58,11 @@ gulp.task("watch", function () {
         gulp.watch(bundle.inputFiles, ["min:js"]);
     });
 
-    getBundles(regex.css).forEach(function (bundle) {
-        gulp.watch(bundle.inputFiles, ["min:css"]);
-    });
+    //getBundles(regex.css).forEach(function (bundle) {
+    //    gulp.watch(bundle.inputFiles, ["min:css"]);
+    //});
+
+    gulp.watch('wwwroot/sass/**/*.scss', ['sass']);
 });
 
 function getBundles(regexPattern) {
