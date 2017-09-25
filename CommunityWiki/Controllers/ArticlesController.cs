@@ -29,6 +29,7 @@ namespace CommunityWiki.Controllers
         private readonly UserManager<User> _userManager;
         private readonly ApplicationDbContext _dbContext;
         private readonly IDateTimeService _dateTimeService;
+        private readonly ISearchService _searchService;
         private readonly IVoteService _voteService;
         private readonly ISideBySideDiffBuilder _diffBuilder;
         private readonly ILogger _logger;
@@ -36,6 +37,7 @@ namespace CommunityWiki.Controllers
         public ArticlesController(UserManager<User> userManager,
             ApplicationDbContext dbContext,
             IDateTimeService dateTimeService,
+            ISearchService searchService,
             IVoteService voteService,
             ISideBySideDiffBuilder diffBuilder,
             ILoggerFactory loggerFactory)
@@ -43,6 +45,7 @@ namespace CommunityWiki.Controllers
             _userManager = userManager;
             _dbContext = dbContext;
             _dateTimeService = dateTimeService;
+            _searchService = searchService;
             _voteService = voteService;
             _diffBuilder = diffBuilder;
             _logger = loggerFactory.CreateLogger<ArticlesController>();
@@ -167,6 +170,15 @@ namespace CommunityWiki.Controllers
 
                 _logger.LogInformation($"Article created. ID: {article.Id} / Title: {article.Title}");
 
+                try
+                {
+                    await _searchService.IndexArticle(article);
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogError(ex, $"Error indexing article ID {article.Id}");
+                }
+
                 var redirUrl = Url.ViewArticleLink(article.Id, article.Slug);
                 return Redirect(redirUrl);
             }
@@ -229,6 +241,15 @@ namespace CommunityWiki.Controllers
 
                 await _dbContext.SaveChangesAsync();
 
+                try
+                {
+                    await _searchService.IndexArticle(article);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Error indexing article ID {article.Id}");
+                }
+                
                 return Redirect(Url.ViewArticleLink(id, article.Slug));
             }
             catch (Exception ex)

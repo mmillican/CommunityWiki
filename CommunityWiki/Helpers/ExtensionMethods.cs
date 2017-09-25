@@ -24,6 +24,23 @@ namespace CommunityWiki.Helpers
             return cleaned;
         }
 
+        public static string Truncate(this string input, int maxLength, string append = null)
+        {
+            if (input.IsNullOrEmpty()) return input;
+            if (input.Length <= maxLength) return input;
+
+            if (append.HasValue())
+            {
+                maxLength = maxLength - append.Length;
+            }
+
+            var result = input.Substring(0, maxLength);
+            if (append.HasValue())
+                result = result + append;
+
+            return result;
+        }
+
         public static string Serialize(this object data, bool camelCaseProps = true)
         {
             if (camelCaseProps)
@@ -38,5 +55,9 @@ namespace CommunityWiki.Helpers
 
             return JsonConvert.SerializeObject(data);
         }
+
+        public static bool IsNullOrEmpty(this string input) => string.IsNullOrEmpty(input);
+
+        public static bool HasValue(this string input) => !IsNullOrEmpty(input);
     }
 }

@@ -1,0 +1,33 @@
+﻿@model CommunityWiki.Models.Search.SearchResultsViewModel
+
+@{
+    ViewData["Title"] = $"Search - {Model.SearchTerm}";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <form method="get" asp-action="Index" class="form-inline">
+            <div class="form-group">
+                <input asp-for="@Model.SearchTerm" name="query" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-default">Search</button>
+        </form>
+    </div>
+</div>
+
+@if (Model.SearchTerm.HasValue() && Model.ResultCount == 0)
+{
+    <h3>No results found for your query.</h3>
+}
+else if (Model.ResultCount > 0)
+{
+    foreach(var result in Model.Articles)
+    {
+        <div class="result article">
+            <h3>
+                <a href="@Url.ViewArticleLink(result.Id, result.Slug)">@result.Title</a>
+            </h3>
+            <p>@result.Body.Truncate(100, "...")</p>
+        </div>
+    }
+}

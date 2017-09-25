@@ -15,6 +15,7 @@ using AutoMapper;
 using System.Reflection;
 using DiffPlex.DiffBuilder;
 using DiffPlex;
+using CommunityWiki.Config;
 
 namespace CommunityWiki
 {
@@ -43,12 +44,15 @@ namespace CommunityWiki
             var appAssembly = typeof(Startup).GetTypeInfo().Assembly;
             services.AddAutoMapper(appAssembly);
 
+            services.Configure<SearchConfig>(Configuration.GetSection("Search"));
+
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<IDateTimeService, DateTimeService>();
             services.AddTransient<IVoteService, VoteService>();
             services.AddTransient<IDiffer, Differ>();
             services.AddTransient<ISideBySideDiffBuilder, SideBySideDiffBuilder>();
+            services.AddTransient<ISearchService, SearchService>();
 
             services.AddMvc();
         }
