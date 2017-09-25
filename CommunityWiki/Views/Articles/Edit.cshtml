@@ -4,6 +4,13 @@
     ViewData["Title"] = "Edit article";
 }
 
+@section head
+{
+    <script type="text/javascript" src="~/js/Markdown.Converter.js"></script>
+    <script type="text/javascript" src="~/js/Markdown.Sanitizer.js"></script>
+    <script type="text/javascript" src="~/js/Markdown.Editor.js"></script>
+}
+
 <div class="row">
     <div class="col-md-12">
         <form asp-action="Edit" asp-route-id="@Model.Id">
@@ -14,7 +21,13 @@
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <textarea asp-for="Body" class="form-control" rows="10" placeholder="Describe your @Model.ArticleTypeName with as much detail as possible"></textarea>
+                <div class="wmd-panel">
+                    <div id="wmd-button-bar"></div>
+                    <textarea asp-for="Body" class="form-control wmd-input" id="wmd-input" rows="10" placeholder="Describe your @Model.ArticleTypeName with as much detail as possible"></textarea>
+                </div>
+
+                <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
+
                 <span asp-validation-for="Body" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -31,4 +44,14 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function () {
+            var mdConverter = Markdown.getSanitizingConverter();
+            var editor1 = new Markdown.Editor(mdConverter);
+
+            editor1.run();
+        });
+    </script>
+
 }
