@@ -14,7 +14,6 @@ namespace CommunityWiki.Services
         ElasticClient Client { get; }
 
         Task IndexArticle(Article article);
-        //Task<ArticleSearchResultModel> SearchArticles(string term, double? minScore = 0.2, int skip = 0, int take = 10);
     }
 
     public class SearchService : ISearchService
@@ -41,48 +40,7 @@ namespace CommunityWiki.Services
             await VerifyIndexExists();
             await Client.IndexAsync(article, idx => idx.Index(_config.IndexName));
         }
-
-        //public async Task<ArticleSearchResultModel> SearchArticles(string term, double? minScore, int skip = 0, int take = 10)
-        //{
-        //    var searchRequest = new SearchRequest<Article>
-        //    {
-        //        MinScore = minScore,
-        //        Query = new BoolQuery
-        //        {
-        //            Should = new QueryContainer[]
-        //            {
-        //                new MultiMatchQuery
-        //                {
-        //                    Fields = new[] { "title"},
-        //                    MinimumShouldMatch = new MinimumShouldMatch("30%"),
-        //                    TieBreaker = 0.2,
-        //                    Type = TextQueryType.Phrase, // or PhrasePrefix
-        //                    Query = term,
-        //                    Boost = 10
-        //                },
-        //                new MultiMatchQuery
-        //                {
-        //                    Fields = new[] { "body"},
-        //                    MinimumShouldMatch = new MinimumShouldMatch("30%"),
-        //                    TieBreaker = 0.2,
-        //                    Type = TextQueryType.Phrase, // or PhrasePrefix
-        //                    Query = term,
-        //                    Boost = 4
-        //                }
-        //            }
-        //        }
-        //    };
-
-        //    var response = await Client.SearchAsync<Article>(searchRequest);
-
-        //    var result = new ArticleSearchResultModel
-        //    {
-        //        Total = response.Hits.Count
-        //    };
-
-        //    return result;
-        //}
-
+        
         private ElasticClient GetClient()
         {
             var nodeUri = new Uri(_config.ElasticNodeUri);
