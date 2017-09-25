@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommunityWiki.Config;
 using CommunityWiki.Entities.Articles;
@@ -66,12 +64,5 @@ namespace CommunityWiki.Services
                 await Client.CreateIndexAsync(createRequest);
             }
         }
-    }
-
-    public class ArticleSearchResultModel
-    {
-        public int Total { get; set; }
-
-        public IEnumerable<Article> Articles { get; set; }
     }
 }
