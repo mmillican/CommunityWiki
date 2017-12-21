@@ -1,6 +1,6 @@
 ﻿@model CommunityWiki.Models.Articles.ArticleListViewModel
 @{
-    ViewData["Title"] = "Articles";
+    ViewData["Title"] = (Model.Type?.Name ?? "Articles");
 }
 
 @* TODO: only show add/edit if authd *@

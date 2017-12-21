@@ -11,8 +11,14 @@
 <div class="article-type-list">
     @foreach (var type in Model.ArticleTypes)
     {
-        <div class="article-type">
-            <h3>@type.Name</h3>
+    <div class="row article-type">
+        <div class="col-md-1 count text-center">
+            <h3>0<br /><small>articles</small></h3>
+        </div>
+        <div class="col-md-11">
+            <h3>
+                <a asp-controller="Articles" asp-action="Index" asp-route-typeSlug="@type.Slug">@type.Name</a>
+            </h3>
             <p>
                 @type.Description
             </p>
@@ -20,5 +26,6 @@
                 <a asp-action="Edit" asp-route-id="@type.Id">Edit</a> | <a asp-controller="Articles" asp-action="Create" asp-route-typeId="@type.Id">New article</a>
             </p>
         </div>
+    </div>
     }
 </div>

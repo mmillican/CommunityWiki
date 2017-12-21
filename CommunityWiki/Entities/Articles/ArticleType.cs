@@ -13,6 +13,9 @@ namespace CommunityWiki.Entities.Articles
         [MaxLength(255)]
         public string Description { get; set; }
 
+        [Required, MaxLength(50)]
+        public string Slug { get; set; }
+
         public virtual List<FieldDefinition> Fields { get; set; }
 
         public ArticleType()

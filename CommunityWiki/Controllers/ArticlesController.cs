@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using CommunityWiki.Data;
 using CommunityWiki.Entities.Articles;
@@ -10,6 +11,7 @@ using CommunityWiki.Entities.Users;
 using CommunityWiki.Helpers;
 using CommunityWiki.Models;
 using CommunityWiki.Models.Articles;
+using CommunityWiki.Models.ArticleTypes;
 using CommunityWiki.Models.Votes;
 using CommunityWiki.Services;
 using DiffPlex.DiffBuilder;
@@ -52,11 +54,19 @@ namespace CommunityWiki.Controllers
         }
 
         [HttpGet("")]
-        public async Task<IActionResult> Index()
+        [HttpGet("{typeSlug}")]
+        public async Task<IActionResult> Index(string typeSlug = null)
         {
+            ArticleType type = null;
+            if (typeSlug.HasValue())
+            {
+                type = await _dbContext.ArticleTypes.FirstOrDefaultAsync(x => x.Slug == typeSlug);
+            }
+
             var articles = await _dbContext.Articles
                     .Include(x => x.ArticleType)
-                .Where(x => x.DeletedOn == null)
+                .Where(x => x.DeletedOn == null
+                    && (type == null || x.ArticleTypeId == type.Id))
                 .ProjectTo<ArticleModel>()
                 .ToListAsync();
 
@@ -64,6 +74,11 @@ namespace CommunityWiki.Controllers
             {
                 Articles = articles
             };
+
+            if (type != null)
+            {
+                model.Type = Mapper.Map<ArticleTypeModel>(type);
+            }
 
             return View(model);
         }

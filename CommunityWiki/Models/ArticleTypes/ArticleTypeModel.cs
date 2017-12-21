@@ -10,5 +10,7 @@ namespace CommunityWiki.Models.ArticleTypes
         public string Name { get; set; }
         [MaxLength(255)]
         public string Description { get; set; }
+
+        public string Slug { get; set; }
     }
 }
