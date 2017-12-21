@@ -4,67 +4,69 @@
     ViewData["Title"] = Model.Title;
 }
 
-<div class="article-voting">
-    <ul class="list-inline">
-        <li>
-            <h3 class="article-score">@Model.Score</h3>
-        </li>
-        <li>
-            <h4>
-                <a href="#" class="btn-vote vote-up" data-vote-type="UpVote">
-                    <span class="glyphicon glyphicon-thumbs-up @(Model.Voting.UserHasUpVoted ? "voted text-success" : "")"></span>
-                </a>
-            </h4>
-        </li>
-        <li>
-            <h4>
-                <a href="#" class="btn-vote vote-down" data-vote-type="DownVote">
-                    <span class="glyphicon glyphicon-thumbs-down @(Model.Voting.UserHasDownVoted ? "voted text-danger" : "")"></span>
-                </a>
-            </h4>
-        </li>
-    </ul>
-</div>
+<div class="row">
+    <div class="col-md-9 main-content">
+        <div class="article-body">
+            @Html.Raw(Model.Body)
 
-<div class="article-status-labels">
-    <article-status Article="Model" />
-</div>
+            <div class="actions article-actions">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
 
-<div class="article-body">
-    @Html.Raw(Model.Body)
-</div>
+                <button id="btn-flag-article" type="button" class="btn btn-default btn-flag-article" title="Report this this article" data-toggle="modal" data-target="#article-flag-modal"><span class="glyphicon glyphicon-flag"></span> Report</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 sidebar">
+        <div class="article-voting visible-md visible-lg">
+            <ul class="list-inline">
+                @*<li>
+                    <h3 class="article-score">@Model.Score</h3>
+                </li>*@
+                <li>
+                    <a href="#" class="btn btn-default btn-vote vote-up" data-vote-type="UpVote">
+                        <span class="glyphicon glyphicon-thumbs-up @(Model.Voting.UserHasUpVoted ? "voted text-success" : "")"></span>
+                        <span class="count">@Model.Voting.UpVoteCount</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="btn btn-default btn-vote vote-down" data-vote-type="DownVote">
+                        <span class="glyphicon glyphicon-thumbs-down @(Model.Voting.UserHasDownVoted ? "voted text-danger" : "")"></span>
+                        <span class="count">@Model.Voting.DownVoteCount</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
 
-<div class="actions article-actions">
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-link"><span class="glyphicon glyphicon-pencil"></span></a>
+        <div class="article-status-labels visible-md visible-lg">
+            <article-status Article="Model" />
+        </div>
 
-    <button id="btn-flag-article" type="button" class="btn btn-link text-danger btn-flag-article" title="Flag this this article" data-toggle="modal" data-target="#article-flag-modal"><span class="glyphicon glyphicon-flag text-danger"></span></button>
-</div>
-
-@if (Model.Revisions.Any())
-{
-    <hr />
-    <h4>Revisions (@Model.RevisionCount)</h4>
-
-    <table class="table table-condensed table-striped revisions">
-        <tr>
-            <th style="width: 10%">Date</th>
-            <th style="width: 15%">Author</th>
-            <th style="width: 15%">Score (at rev)</th>
-            <th style="width: 50%">Comment</th>
-            <th style="width: 10%"></th>
-        </tr>
-        @foreach(var rev in Model.Revisions)
+        @if (Model.Revisions.Any())
         {
-            <tr>
-                <td>@rev.RevisionDate.ToString("d")</td>
-                <td>@rev.RevisionUserName</td>
-                <td>@rev.Score</td>
-                <td>@rev.Comment</td>
-                <td><a asp-action="CompareRevision" asp-route-articleId="@Model.Id" asp-route-revisionId="@rev.Id">Compare</a></td>
-            </tr>
+            <hr />
+            <h4>Revisions (@Model.RevisionCount)</h4>
+
+            <table class="table table-condensed table-striped revisions">
+                <tr>
+                    <th style="width: 10%">Date</th>
+                    <th style="width: 10%"></th>
+                </tr>
+                @foreach (var rev in Model.Revisions)
+                {
+                    <tr title="@rev.Comment by @rev.RevisionUserName">
+                        <td>@rev.RevisionDate.ToString("d")</td>
+                        <td><a asp-action="CompareRevision" asp-route-articleId="@Model.Id" asp-route-revisionId="@rev.Id">Compare</a></td>
+                    </tr>
+                }
+            </table>
         }
-    </table>
-}
+    </div>
+
+</div>
+
+
+
+
 
 <div id="article-flag-modal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
@@ -158,6 +160,7 @@
 
                 var $btn = $(this),
                     $btnIcon = $(this).find('.glyphicon'),
+                    $btnCount = $(this).find('.count'),
                     $spnArticleScore = $('.article-score'),
                     voteType = $btn.data('voteType');
 
@@ -174,10 +177,12 @@
                         success: function (result) {
                             $spnArticleScore.text(result.score);
                             votingData.userHasVoted = true;
+                            $btnCount.text(result.voteCount);
 
                             if (voteType === 'UpVote') {
                                 $btnIcon.addClass('text-success');
                                 votingData.userHasUpVoted = true;
+                                
                             } else if(voteType === 'DownVote'){
                                 $btnIcon.addClass('text-danger');
                                 votingData.userHasDownVoted = true;
@@ -196,6 +201,7 @@
                             console.log(result);
                             $btnIcon.removeClass('text-success text-danger');
                             $spnArticleScore.text(result.score);
+                            $btnCount.text(result.voteCount);
                             votingData.userHasVoted = false;
                             votingData.userHasUpVoted = false;
                             votingData.userHasDownVoted = false;
