@@ -29,6 +29,7 @@ namespace CommunityWiki.Controllers
     public class ArticlesController : Controller
     {
         private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly ApplicationDbContext _dbContext;
         private readonly IDateTimeService _dateTimeService;
         private readonly ISearchService _searchService;
@@ -37,6 +38,7 @@ namespace CommunityWiki.Controllers
         private readonly ILogger _logger;
 
         public ArticlesController(UserManager<User> userManager,
+            SignInManager<User> signInManager,
             ApplicationDbContext dbContext,
             IDateTimeService dateTimeService,
             ISearchService searchService,
@@ -45,6 +47,7 @@ namespace CommunityWiki.Controllers
             ILoggerFactory loggerFactory)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
             _dbContext = dbContext;
             _dateTimeService = dateTimeService;
             _searchService = searchService;
@@ -83,10 +86,11 @@ namespace CommunityWiki.Controllers
             return View(model);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}/{slug}")]
         public async Task<IActionResult> ViewArticle(int id, string slug)
         {
-            var article = await _dbContext.Articles.FindAsync(id);
+            var article = await _dbContext.Articles.Include(x => x.ArticleType).SingleOrDefaultAsync(x => x.Id == id);
             if (article == null || article.DeletedOn.HasValue)
             {
                 _logger.LogInformation($"Article ID {id} not found (SLUG: {slug})");
@@ -98,17 +102,21 @@ namespace CommunityWiki.Controllers
             var markdown = new Markdown();
 
             var model = article.ToViewModel();
+            model.IsLoggedIn = _signInManager.IsSignedIn(User);
 
             model.Body = markdown.Transform(model.Body);
             model.Revisions = await BuildArticleRevisionHistory(id);
 
             var articleVotes = await _voteService.GetVotesForArticle(id);
 
-            model.Voting.UserCanVote = user != null;
-            model.Voting.UserHasUpVoted = articleVotes.Any(x => x.UserId == user.Id && x.VoteType == VoteType.UpVote);
-            model.Voting.UserHasDownVoted = articleVotes.Any(x => x.UserId == user.Id && x.VoteType == VoteType.DownVote);
-            model.Voting.UpVoteCount = articleVotes.Count(x => x.VoteType == VoteType.UpVote);
-            model.Voting.DownVoteCount = articleVotes.Count(x => x.VoteType == VoteType.DownVote);
+            if (user != null)
+            {
+                model.Voting.UserCanVote = true;
+                model.Voting.UserHasUpVoted = articleVotes.Any(x => x.UserId == user.Id && x.VoteType == VoteType.UpVote);
+                model.Voting.UserHasDownVoted = articleVotes.Any(x => x.UserId == user.Id && x.VoteType == VoteType.DownVote);
+                model.Voting.UpVoteCount = articleVotes.Count(x => x.VoteType == VoteType.UpVote);
+                model.Voting.DownVoteCount = articleVotes.Count(x => x.VoteType == VoteType.DownVote);
+            }
 
             return View(model);
         }

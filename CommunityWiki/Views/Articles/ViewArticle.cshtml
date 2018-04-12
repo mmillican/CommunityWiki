@@ -1,7 +1,7 @@
 ﻿@using CommunityWiki.Entities.Articles
 @model CommunityWiki.Models.Articles.ArticleViewModel
 @{
-    ViewData["Title"] = Model.Title;
+    ViewData["Title"] = $"{Model.ArticleTypeName}: {Model.Title}";
 }
 
 <div class="row">
@@ -9,40 +9,43 @@
         <div class="article-body">
             @Html.Raw(Model.Body)
 
-            <div class="actions article-actions">
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
+            @if (Model.IsLoggedIn)
+            {
+                <div class="actions article-actions">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
 
-                <button id="btn-flag-article" type="button" class="btn btn-default btn-flag-article" title="Report this this article" data-toggle="modal" data-target="#article-flag-modal"><span class="glyphicon glyphicon-flag"></span> Report</button>
-            </div>
+                    <button id="btn-flag-article" type="button" class="btn btn-default btn-flag-article" title="Report this this article" data-toggle="modal" data-target="#article-flag-modal"><span class="glyphicon glyphicon-flag"></span> Report</button>
+                </div>
+            }
         </div>
     </div>
     <div class="col-md-3 sidebar">
-        <div class="article-voting visible-md visible-lg">
-            <ul class="list-inline">
-                @*<li>
-                    <h3 class="article-score">@Model.Score</h3>
-                </li>*@
-                <li>
-                    <a href="#" class="btn btn-default btn-vote vote-up" data-vote-type="UpVote">
-                        <span class="glyphicon glyphicon-thumbs-up @(Model.Voting.UserHasUpVoted ? "voted text-success" : "")"></span>
-                        <span class="count">@Model.Voting.UpVoteCount</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="btn btn-default btn-vote vote-down" data-vote-type="DownVote">
-                        <span class="glyphicon glyphicon-thumbs-down @(Model.Voting.UserHasDownVoted ? "voted text-danger" : "")"></span>
-                        <span class="count">@Model.Voting.DownVoteCount</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        <div class="article-status-labels visible-md visible-lg">
-            <article-status Article="Model" />
-        </div>
-
-        @if (Model.Revisions.Any())
+        @if (Model.IsLoggedIn)
         {
+            <div class="article-voting visible-md visible-lg">
+                <ul class="list-inline">
+                    @*<li>
+                        <h3 class="article-score">@Model.Score</h3>
+                    </li>*@
+                    <li>
+                        <a href="#" class="btn btn-default btn-vote vote-up" data-vote-type="UpVote">
+                            <span class="glyphicon glyphicon-thumbs-up @(Model.Voting.UserHasUpVoted ? "voted text-success" : "")"></span>
+                            <span class="count">@Model.Voting.UpVoteCount</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="btn btn-default btn-vote vote-down" data-vote-type="DownVote">
+                            <span class="glyphicon glyphicon-thumbs-down @(Model.Voting.UserHasDownVoted ? "voted text-danger" : "")"></span>
+                            <span class="count">@Model.Voting.DownVoteCount</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="article-status-labels visible-md visible-lg">
+                <article-status Article="Model" />
+            </div>
+        
             <hr />
             <h4>Revisions (@Model.RevisionCount)</h4>
 
@@ -60,62 +63,69 @@
                 }
             </table>
         }
+        else
+        {
+            <div class="alert alert-info">
+                Sign in to vote, edit and view revision history.
+            </div>
+
+        }
     </div>
 
 </div>
 
 
+@if (Model.IsLoggedIn)
+{
+    <div id="article-flag-modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Flag this article...</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="flag-article-modal-notices"></div>
 
-
-
-<div id="article-flag-modal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Flag this article...</h4>
-            </div>
-            <div class="modal-body">
-                <div id="flag-article-modal-notices"></div>
-
-                <ul class="list-unstyled article-flag-options">
-                    <li>
-                        <input type="radio" id="Flagging_Type_Spam" asp-for="Flagging.Type" value="@VoteType.Spam" /> <label for="Flagging_Type_Spam" class="flag-reason">Spam</label><br />
-                        <span class="flag-description">This is spam and provides no value to the community beyond a commercial purpose</span>
-                    </li>
-                    <li>
-                        <input type="radio" id="Flagging_Type_InvalidSources" asp-for="Flagging.Type" value="@VoteType.InvalidSources" /> <label for="Flagging_Type_InvalidSources" class="flag-reason">Invalid sources</label><br />
-                        <span class="flag-description">This article has sources, but one or more of them are invalid</span>
-                    </li>
-                    <li>
-                        <input type="radio" id="Flagging_Type_Plagiarism" asp-for="Flagging.Type" value="@VoteType.Plagiarism" /> <label for="Flagging_Type_Plagiarism" class="flag-reason">Plagiarism</label><br />
-                        <span class="flag-description">This article has been plagiarized in full or in part</span>
-                    </li>
-                    <li>
-                        <input type="radio" id="Flagging_Type_NotHelpful" asp-for="Flagging.Type" value="@VoteType.NotHelpful" /> <label for="Flagging_Type_NotHelpful" class="flag-reason">Not helpful</label><br />
-                        <span class="flag-description">This article provides no value to the community</span>
-                    </li>
-                    <li>
-                        <input type="radio" id="Flagging_Type_Offensive" asp-for="Flagging.Type" value="@VoteType.Offensive" /> <label for="Flagging_Type_Offensive" class="flag-reason">Offensive</label><br />
-                        <span class="flag-description">This article is offensive to a user in this community, a specific person (not in the community), or a group of people</span>
-                    </li>
-                    <li>
-                        <input type="radio" id="Flagging_Type_NeedsReview" asp-for="Flagging.Type" value="@VoteType.NeedsReview" /> <label for="Flagging_Type_NeedsReview" class="flag-reason">Needs review</label><br />
-                        <span class="flag-description">The content in this article is in need of review</span>
-                    </li>
-                    <li>
-                        <input type="radio" id="Flagging_Type_Deletion" asp-for="Flagging.Type" value="@VoteType.Deletion" /> <label for="Flagging_Type_Deletion" class="flag-reason">Delete article</label><br />
-                        <span class="flag-description">Flag this article to have it deleted from  the site.  This should only be used when action by another flag is not sufficient.</span>
-                    </li>
-                </ul>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" id="btn-submit-flag" class="btn btn-primary">Submit</button>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+                    <ul class="list-unstyled article-flag-options">
+                        <li>
+                            <input type="radio" id="Flagging_Type_Spam" asp-for="Flagging.Type" value="@VoteType.Spam" /> <label for="Flagging_Type_Spam" class="flag-reason">Spam</label><br />
+                            <span class="flag-description">This is spam and provides no value to the community beyond a commercial purpose</span>
+                        </li>
+                        <li>
+                            <input type="radio" id="Flagging_Type_InvalidSources" asp-for="Flagging.Type" value="@VoteType.InvalidSources" /> <label for="Flagging_Type_InvalidSources" class="flag-reason">Invalid sources</label><br />
+                            <span class="flag-description">This article has sources, but one or more of them are invalid</span>
+                        </li>
+                        <li>
+                            <input type="radio" id="Flagging_Type_Plagiarism" asp-for="Flagging.Type" value="@VoteType.Plagiarism" /> <label for="Flagging_Type_Plagiarism" class="flag-reason">Plagiarism</label><br />
+                            <span class="flag-description">This article has been plagiarized in full or in part</span>
+                        </li>
+                        <li>
+                            <input type="radio" id="Flagging_Type_NotHelpful" asp-for="Flagging.Type" value="@VoteType.NotHelpful" /> <label for="Flagging_Type_NotHelpful" class="flag-reason">Not helpful</label><br />
+                            <span class="flag-description">This article provides no value to the community</span>
+                        </li>
+                        <li>
+                            <input type="radio" id="Flagging_Type_Offensive" asp-for="Flagging.Type" value="@VoteType.Offensive" /> <label for="Flagging_Type_Offensive" class="flag-reason">Offensive</label><br />
+                            <span class="flag-description">This article is offensive to a user in this community, a specific person (not in the community), or a group of people</span>
+                        </li>
+                        <li>
+                            <input type="radio" id="Flagging_Type_NeedsReview" asp-for="Flagging.Type" value="@VoteType.NeedsReview" /> <label for="Flagging_Type_NeedsReview" class="flag-reason">Needs review</label><br />
+                            <span class="flag-description">The content in this article is in need of review</span>
+                        </li>
+                        <li>
+                            <input type="radio" id="Flagging_Type_Deletion" asp-for="Flagging.Type" value="@VoteType.Deletion" /> <label for="Flagging_Type_Deletion" class="flag-reason">Delete article</label><br />
+                            <span class="flag-description">Flag this article to have it deleted from  the site.  This should only be used when action by another flag is not sufficient.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" id="btn-submit-flag" class="btn btn-primary">Submit</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+}
 
 @section scripts
 {
