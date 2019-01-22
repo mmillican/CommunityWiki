@@ -5,7 +5,7 @@
 
 @* TODO: only show add/edit if authd *@
 <div class="actions clearfix">
-    <a asp-action="Create" class="btn btn-success pull-left">New article</a>
+    <a asp-action="Create" asp-route-typeId="@Model.Type.Id" class="btn btn-success pull-left">New article</a>
 
     <div class="btn-group pull-right">
         <button type="button" class="btn btn-default dropdown-toggle btn-review-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
