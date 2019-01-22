@@ -12,7 +12,7 @@
                 </td>
                 <td class="line @diffLine.Type.ToString()Line">
                     <span class="lineText">
-                        @Html.Partial("_DiffLine", diffLine)
+                        <partial name="_DiffLine" model="diffLine" />
                     </span>
                 </td>
             </tr>
