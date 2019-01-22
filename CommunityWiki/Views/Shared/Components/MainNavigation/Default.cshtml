@@ -1,0 +1,9 @@
+﻿@model CommunityWiki.Models.Components.MainNavigationViewModel
+
+<ul class="nav navbar-nav">
+    <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+    @foreach (var type in Model.ArticleTypes)
+    {
+        <li><a asp-area="" asp-controller="Articles" asp-action="Index" asp-route-typeSlug="@type.Slug">@type.Name</a></li>
+    }
+</ul>
