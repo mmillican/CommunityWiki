@@ -58,7 +58,8 @@ namespace CommunityWiki.Services
                 settings.NumberOfReplicas = 0;
                 settings.NumberOfShards = 5;
 
-                var createRequest = new CreateIndexRequest(new IndexName { Name = _config.IndexName, Cluster = "fFGNSMh" });
+                var indexName = (IndexName) $"{_config.IndexName}:fFGNSMh";
+                var createRequest = new CreateIndexRequest(indexName);
                 createRequest.Settings = settings;
 
                 await Client.CreateIndexAsync(createRequest);
