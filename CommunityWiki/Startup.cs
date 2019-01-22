@@ -16,6 +16,9 @@ using System.Reflection;
 using DiffPlex.DiffBuilder;
 using DiffPlex;
 using CommunityWiki.Config;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace CommunityWiki
 {
@@ -31,6 +34,13 @@ namespace CommunityWiki
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
@@ -54,7 +64,12 @@ namespace CommunityWiki
             services.AddTransient<ISideBySideDiffBuilder, SideBySideDiffBuilder>();
             services.AddTransient<ISearchService, SearchService>();
 
-            services.AddMvc();
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddLogging(builder => builder
+                .AddConfiguration(Configuration)
+                .AddConsole());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,15 +78,17 @@ namespace CommunityWiki
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
                 app.UseDatabaseErrorPage();
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
             }
 
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseCookiePolicy();
 
             app.UseAuthentication();
 

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using CommunityWiki.Data;
 using CommunityWiki.Entities.Articles;
@@ -12,7 +10,7 @@ using Xunit;
 
 namespace CommunityWiki.Tests.Services
 {
-    
+
     public class VoteServiceTests
     {
         [Fact]
@@ -496,7 +494,7 @@ namespace CommunityWiki.Tests.Services
         private ApplicationDbContext GetTestDbContext()
         {
             var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .add
                 .Options;
 
             var testContext = new ApplicationDbContext(dbOptions);
