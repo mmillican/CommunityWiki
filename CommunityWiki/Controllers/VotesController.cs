@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 namespace CommunityWiki.Controllers
 {
     [Route("votes")]
+    [Produces("application/json")]
     public class VotesController : Controller
     {
         private readonly UserManager<User> _userManager;
@@ -35,7 +36,7 @@ namespace CommunityWiki.Controllers
         }
 
         [HttpPost("")]
-        public async Task<IActionResult> Create(VoteModel model)
+        public async Task<IActionResult> Create([FromBody] VoteModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -87,7 +88,7 @@ namespace CommunityWiki.Controllers
         }
 
         [HttpDelete("")]
-        public async Task<IActionResult> Delete(VoteModel model)
+        public async Task<IActionResult> Delete([FromBody] VoteModel model)
         {
             try
             {

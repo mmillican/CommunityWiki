@@ -56,6 +56,8 @@ namespace CommunityWiki.Helpers
             return JsonConvert.SerializeObject(data);
         }
 
+        public static string ToJsBoolean(this bool val) => val.ToString().ToLower();
+
         public static bool IsNullOrEmpty(this string input) => string.IsNullOrEmpty(input);
 
         public static bool HasValue(this string input) => !IsNullOrEmpty(input);

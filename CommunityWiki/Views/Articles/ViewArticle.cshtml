@@ -4,7 +4,7 @@
     ViewData["Title"] = $"{Model.ArticleTypeName}: {Model.Title}";
 }
 
-<div class="row">
+<div class="row" id="article">
     <div class="col-md-9 main-content">
         <div class="article-body">
             @Html.Raw(Model.Body)
@@ -25,18 +25,18 @@
             <div class="article-voting visible-md visible-lg">
                 <ul class="list-inline">
                     @*<li>
-                        <h3 class="article-score">@Model.Score</h3>
-                    </li>*@
+                            <h3 class="article-score">@Model.Score</h3>
+                        </li>*@
                     <li>
-                        <a href="#" class="btn btn-default btn-vote vote-up" data-vote-type="UpVote">
-                            <span class="glyphicon glyphicon-thumbs-up @(Model.Voting.UserHasUpVoted ? "voted text-success" : "")"></span>
-                            <span class="count">@Model.Voting.UpVoteCount</span>
-                        </a>
+                        <button class="btn btn-default btn-vote vote-up" v-on:click="vote('UpVote')">
+                            <span v-bind:class="[ { 'voted text-success': voting.userHasUpVoted } , 'glyphicon glyphicon-thumbs-up']"></span>
+                            <span class="count">{{ voting.upVoteCount }}</span>
+                        </button>
                     </li>
                     <li>
-                        <a href="#" class="btn btn-default btn-vote vote-down" data-vote-type="DownVote">
-                            <span class="glyphicon glyphicon-thumbs-down @(Model.Voting.UserHasDownVoted ? "voted text-danger" : "")"></span>
-                            <span class="count">@Model.Voting.DownVoteCount</span>
+                        <a href="#" class="btn btn-default btn-vote vote-down" v-on:click="vote('DownVote')">
+                            <span v-bind:class="[ { 'voted text-danger': voting.userHasDownVoted } , 'glyphicon glyphicon-thumbs-down']"></span>
+                            <span class="count">{{ voting.downVoteCount }}</span>
                         </a>
                     </li>
                 </ul>
@@ -45,7 +45,7 @@
             <div class="article-status-labels visible-md visible-lg">
                 <article-status Article="Model" />
             </div>
-        
+
             <hr />
             <h4>Revisions (@Model.RevisionCount)</h4>
 
@@ -72,154 +72,194 @@
         }
     </div>
 
+
+
+    @if (Model.IsLoggedIn)
+    {
+        <div id="article-flag-modal" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <form v-on:submit.prevent="flag" class="modal-body">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">Flag this article...</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div id="flag-article-modal-notices"></div>
+
+                            <ul class="list-unstyled article-flag-options">
+                                <li>
+                                    <input type="radio" id="Flagging_Type_Spam" v-model="flagging.type" value="@VoteType.Spam" /> <label for="Flagging_Type_Spam" class="flag-reason">Spam</label><br />
+                                    <span class="flag-description">This is spam and provides no value to the community beyond a commercial purpose</span>
+                                </li>
+                                <li>
+                                    <input type="radio" id="Flagging_Type_InvalidSources" v-model="flagging.type" value="@VoteType.InvalidSources" /> <label for="Flagging_Type_InvalidSources" class="flag-reason">Invalid sources</label><br />
+                                    <span class="flag-description">This article has sources, but one or more of them are invalid</span>
+                                </li>
+                                <li>
+                                    <input type="radio" id="Flagging_Type_Plagiarism" v-model="flagging.type" value="@VoteType.Plagiarism" /> <label for="Flagging_Type_Plagiarism" class="flag-reason">Plagiarism</label><br />
+                                    <span class="flag-description">This article has been plagiarized in full or in part</span>
+                                </li>
+                                <li>
+                                    <input type="radio" id="Flagging_Type_NotHelpful" v-model="flagging.type" value="@VoteType.NotHelpful" /> <label for="Flagging_Type_NotHelpful" class="flag-reason">Not helpful</label><br />
+                                    <span class="flag-description">This article provides no value to the community</span>
+                                </li>
+                                <li>
+                                    <input type="radio" id="Flagging_Type_Offensive" v-model="flagging.type" value="@VoteType.Offensive" /> <label for="Flagging_Type_Offensive" class="flag-reason">Offensive</label><br />
+                                    <span class="flag-description">This article is offensive to a user in this community, a specific person (not in the community), or a group of people</span>
+                                </li>
+                                <li>
+                                    <input type="radio" id="Flagging_Type_NeedsReview" v-model="flagging.type" value="@VoteType.NeedsReview" /> <label for="Flagging_Type_NeedsReview" class="flag-reason">Needs review</label><br />
+                                    <span class="flag-description">The content in this article is in need of review</span>
+                                </li>
+                                <li>
+                                    <input type="radio" id="Flagging_Type_Deletion" v-model="flagging.type" value="@VoteType.Deletion" /> <label for="Flagging_Type_Deletion" class="flag-reason">Delete article</label><br />
+                                    <span class="flag-description">Flag this article to have it deleted from  the site.  This should only be used when action by another flag is not sufficient.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" id="btn-submit-flag" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </form>
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+    }
 </div>
-
-
-@if (Model.IsLoggedIn)
-{
-    <div id="article-flag-modal" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Flag this article...</h4>
-                </div>
-                <div class="modal-body">
-                    <div id="flag-article-modal-notices"></div>
-
-                    <ul class="list-unstyled article-flag-options">
-                        <li>
-                            <input type="radio" id="Flagging_Type_Spam" asp-for="Flagging.Type" value="@VoteType.Spam" /> <label for="Flagging_Type_Spam" class="flag-reason">Spam</label><br />
-                            <span class="flag-description">This is spam and provides no value to the community beyond a commercial purpose</span>
-                        </li>
-                        <li>
-                            <input type="radio" id="Flagging_Type_InvalidSources" asp-for="Flagging.Type" value="@VoteType.InvalidSources" /> <label for="Flagging_Type_InvalidSources" class="flag-reason">Invalid sources</label><br />
-                            <span class="flag-description">This article has sources, but one or more of them are invalid</span>
-                        </li>
-                        <li>
-                            <input type="radio" id="Flagging_Type_Plagiarism" asp-for="Flagging.Type" value="@VoteType.Plagiarism" /> <label for="Flagging_Type_Plagiarism" class="flag-reason">Plagiarism</label><br />
-                            <span class="flag-description">This article has been plagiarized in full or in part</span>
-                        </li>
-                        <li>
-                            <input type="radio" id="Flagging_Type_NotHelpful" asp-for="Flagging.Type" value="@VoteType.NotHelpful" /> <label for="Flagging_Type_NotHelpful" class="flag-reason">Not helpful</label><br />
-                            <span class="flag-description">This article provides no value to the community</span>
-                        </li>
-                        <li>
-                            <input type="radio" id="Flagging_Type_Offensive" asp-for="Flagging.Type" value="@VoteType.Offensive" /> <label for="Flagging_Type_Offensive" class="flag-reason">Offensive</label><br />
-                            <span class="flag-description">This article is offensive to a user in this community, a specific person (not in the community), or a group of people</span>
-                        </li>
-                        <li>
-                            <input type="radio" id="Flagging_Type_NeedsReview" asp-for="Flagging.Type" value="@VoteType.NeedsReview" /> <label for="Flagging_Type_NeedsReview" class="flag-reason">Needs review</label><br />
-                            <span class="flag-description">The content in this article is in need of review</span>
-                        </li>
-                        <li>
-                            <input type="radio" id="Flagging_Type_Deletion" asp-for="Flagging.Type" value="@VoteType.Deletion" /> <label for="Flagging_Type_Deletion" class="flag-reason">Delete article</label><br />
-                            <span class="flag-description">Flag this article to have it deleted from  the site.  This should only be used when action by another flag is not sufficient.</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" id="btn-submit-flag" class="btn btn-primary">Submit</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-}
 
 @section scripts
 {
+    <partial name="_VueScripts" />
     <script>
-        $(document).ready(function () {
-            var $flagModal = $('#article-flag-modal');
-
-            $('#btn-submit-flag').on('click', function (e) {
-                e.preventDefault();
-
-                var flagData = {
-                    articleId: @Model.Id,
-                    voteType: $('input[name="Flagging.Type"]:checked').val()
-                };
-
-                $.ajax({
-                    url: '@Url.Action("Create", "Votes")',
-                    type: 'POST',
-                    data: flagData,
-                    success: function (result) {
-                        console.log(result);
-
-                        $flagModal.modal('hide');
-                        wiki.notices.addSuccess('Your flag has been recorded.  Thanks for helping tidy up.')
-                    },
-                    error: function () {
-                        console.log('error creating vote');
-
-                        wiki.notices.addError('There was an error recording your flag.  Please try again.', $('#flag-article-modal-notices'), 0);
-                    }
-                });
-            })
-
-            var votingData = @(Html.Raw(Model.Voting.Serialize()));
-
-            $(document).on('click', '.btn-vote', function (e) {
-                e.preventDefault();
-
-                if (!votingData.userCanVote) {
-                    return;
+        var articleApp = new Vue({
+            el: '#article',
+            data: {
+                isLoggedIn: @Model.IsLoggedIn.ToJsBoolean(),
+                article: {
+                    id: @Model.Id,
+                    typeId: @Model.ArticleTypeId,
+                    title: '@Model.Title',
+                    slug: '@Model.Slug',
+                    viewCount: @Model.ViewCount,
+                    revisionCount: @Model.RevisionCount,
+                    isFlaggedForReview: @Model.IsFlaggedForReview.ToJsBoolean(),
+                    isFlaggedForDeletion: @Model.IsFlaggedForDeletion.ToJsBoolean(),
+                    score: @Model.Score
+                },
+                voting: {
+                    userCanVote: @Model.Voting.UserCanVote.ToJsBoolean(),
+                    userHasVoted: @Model.Voting.UserHasVoted.ToJsBoolean(),
+                    userHasUpVoted: @Model.Voting.UserHasUpVoted.ToJsBoolean(),
+                    userHasDownVoted: @Model.Voting.UserHasDownVoted.ToJsBoolean(),
+                    upVoteCount: @Model.Voting.UpVoteCount,
+                    downVoteCount: @Model.Voting.DownVoteCount,
+                    test: 'test'
+                },
+                flagging: {
+                    type: null
                 }
+            },
+            methods: {
+                vote: function (voteType) {
 
-                var $btn = $(this),
-                    $btnIcon = $(this).find('.glyphicon'),
-                    $btnCount = $(this).find('.count'),
-                    $spnArticleScore = $('.article-score'),
-                    voteType = $btn.data('voteType');
+                    if (!this.voting.userCanVote) {
+                        return;
+                    }
 
-                if (!votingData.userHasVoted) {
+                    if (!this.voting.userHasVoted) {
+                        this.addVote(voteType);
+                    } else {
+                        this.removeVote(voteType);
+                    }
+                },
+                addVote: function (voteType) {
+                    var self = this;
                     var data = {
-                        articleId: @Model.Id,
+                        articleId: self.article.id,
                         voteType: voteType
                     };
 
-                    $.ajax({
-                        url: '@Url.Action("Create", "Votes")',
-                        type: 'POST',
-                        data: data,
-                        success: function (result) {
-                            $spnArticleScore.text(result.score);
-                            votingData.userHasVoted = true;
-                            $btnCount.text(result.voteCount);
+                    var xhr = new XMLHttpRequest();                    
+                    xhr.open('POST', '@Url.Action("Create", "Votes")');
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+
+                    xhr.onload = function () {
+                        if (xhr.readyState === xhr.DONE && xhr.status === 201) {
+                            var resp = JSON.parse(xhr.response);
+
+                            self.article.score = @Model.Score;
+                            self.voting.userHasVoted = true;
 
                             if (voteType === 'UpVote') {
-                                $btnIcon.addClass('text-success');
-                                votingData.userHasUpVoted = true;
-                                
-                            } else if(voteType === 'DownVote'){
-                                $btnIcon.addClass('text-danger');
-                                votingData.userHasDownVoted = true;
+                                self.voting.upVoteCount = resp.voteCount;
+                                self.voting.userHasUpVoted = true;
+                            }
+                            else if (voteType === 'DownVote') {
+                                self.voting.downVoteCount = resp.voteCount;
+                                self.voting.userHasDownVoted = true;
                             }
                         }
-                    });
-                } else if ((voteType === 'UpVote' && votingData.userHasUpVoted) || (voteType === 'DownVote' && votingData.userHasDownVoted)) {
-                    $.ajax({
-                        url: '@Url.Action("Delete", "Votes")',
-                        type: 'DELETE',
-                        data: {
-                            articleId: @Model.Id,
-                            voteType: voteType
-                        },
-                        success: function (result) {
-                            console.log(result);
-                            $btnIcon.removeClass('text-success text-danger');
-                            $spnArticleScore.text(result.score);
-                            $btnCount.text(result.voteCount);
-                            votingData.userHasVoted = false;
-                            votingData.userHasUpVoted = false;
-                            votingData.userHasDownVoted = false;
-                        }
+                    };
 
-                    })
+                    xhr.send(JSON.stringify(data));
+                },
+                removeVote: function (voteType) {
+                    var self = this;
+                    var data = {
+                        articleId: self.article.id,
+                        voteType: voteType
+                    };
+
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('DELETE', '@Url.Action("Create", "Votes")');
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+
+                    xhr.onload = function () {
+                        if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+                            self.article.score = @Model.Score;
+                            self.voting.userHasVoted = false;
+
+                            var resp = JSON.parse(xhr.response);
+
+                            if (voteType === 'UpVote') {
+                                self.voting.upVoteCount = resp.voteCount;
+                                self.voting.userHasUpVoted = false;
+                            }
+                            else if (voteType === 'DownVote') {
+                                self.voting.downVoteCount = resp.voteCount;
+                                self.voting.userHasDownVoted = false;
+                            }
+                        }
+                    };
+
+                    xhr.send(JSON.stringify(data));
+                },
+                flag: function () {
+                    var self = this;
+                    var data = {
+                        articleId: self.article.id,
+                        voteType: self.flagging.type
+                    };
+                    
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '@Url.Action("Create", "Votes")');
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+
+                    xhr.onload = function () {
+                        if (xhr.readyState === xhr.DONE && xhr.status === 201) {
+                            // Yup, shouldn't use jQuery here...
+                            $('#article-flag-modal').modal('hide');
+                            wiki.notices.addSuccess('Your flag has been recorded.  Thanks for helping tidy up.')
+                        } else if (xhr.readyState === xhr.DONE) {
+                            wiki.notices.addError('There was an error recording your flag.  Please try again.', $('#flag-article-modal-notices'), 0);
+                        }
+                    };
+
+                    xhr.send(JSON.stringify(data));
                 }
-            });
+            }
         });
     </script>
 }
