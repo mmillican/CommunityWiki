@@ -24,7 +24,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CommunityWiki.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = Constants.Policies.ApprovedUser)]
     [Route("articles")]
     public class ArticlesController : Controller
     {

@@ -6,12 +6,14 @@ using CommunityWiki.Entities.Articles;
 using CommunityWiki.Entities.Users;
 using CommunityWiki.Models.Votes;
 using CommunityWiki.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace CommunityWiki.Controllers
 {
+    [Authorize(Policy = Constants.Policies.ApprovedUser)]
     [Route("votes")]
     [Produces("application/json")]
     public class VotesController : Controller

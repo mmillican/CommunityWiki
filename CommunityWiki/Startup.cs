@@ -19,6 +19,8 @@ using CommunityWiki.Config;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
+using CommunityWiki.Auth;
 
 namespace CommunityWiki
 {
@@ -51,10 +53,16 @@ namespace CommunityWiki
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddAuthorization(auth =>
+            {
+                auth.AddPolicy(Constants.Policies.ApprovedUser, policy => policy.AddRequirements(new ApprovedUserRequirement()));
+            });
+
             var appAssembly = typeof(Startup).GetTypeInfo().Assembly;
             services.AddAutoMapper(appAssembly);
 
             services.Configure<SearchConfig>(Configuration.GetSection("Search"));
+            services.Configure<UserConfig>(Configuration.GetSection("Users"));
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
@@ -63,6 +71,7 @@ namespace CommunityWiki
             services.AddTransient<IDiffer, Differ>();
             services.AddTransient<ISideBySideDiffBuilder, SideBySideDiffBuilder>();
             services.AddTransient<ISearchService, SearchService>();
+            services.AddScoped<IAuthorizationHandler, ApprovedUserAuthHandler>();
 
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);

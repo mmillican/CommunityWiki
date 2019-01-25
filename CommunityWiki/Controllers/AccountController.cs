@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using CommunityWiki.Entities.Users;
 using CommunityWiki.Models.AccountViewModels;
 using CommunityWiki.Services;
+using CommunityWiki.Config;
 
 namespace CommunityWiki.Controllers
 {
@@ -23,17 +24,23 @@ namespace CommunityWiki.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IEmailSender _emailSender;
+        private readonly ISystemClock _systemClock;
+        private readonly UserConfig _userConfig;
         private readonly ILogger _logger;
 
         public AccountController(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             IEmailSender emailSender,
+            IOptions<UserConfig> userConfig,
+            ISystemClock systemClock,
             ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _systemClock = systemClock;
+            _userConfig = userConfig.Value;
             _logger = logger;
         }
 
@@ -225,8 +232,15 @@ namespace CommunityWiki.Controllers
                     UserName = model.Email,
                     Email = model.Email,
                     FirstName = model.FirstName,
-                    LastName = model.LastName
+                    LastName = model.LastName,
+                    JoinedOn = _systemClock.UtcNow.DateTime
                 };
+
+                if (!_userConfig.RequireNewUserApproval)
+                {
+                    user.ApprovedOn = _systemClock.UtcNow.DateTime;
+                }
+
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
