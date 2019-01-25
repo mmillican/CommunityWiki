@@ -31,6 +31,7 @@ namespace CommunityWiki.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ApplicationDbContext _dbContext;
+        private readonly IMapper _mapper;
         private readonly IDateTimeService _dateTimeService;
         private readonly ISearchService _searchService;
         private readonly IVoteService _voteService;
@@ -40,6 +41,7 @@ namespace CommunityWiki.Controllers
         public ArticlesController(UserManager<User> userManager,
             SignInManager<User> signInManager,
             ApplicationDbContext dbContext,
+            IMapper mapper,
             IDateTimeService dateTimeService,
             ISearchService searchService,
             IVoteService voteService,
@@ -49,6 +51,7 @@ namespace CommunityWiki.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _dbContext = dbContext;
+            _mapper = mapper;
             _dateTimeService = dateTimeService;
             _searchService = searchService;
             _voteService = voteService;
@@ -101,7 +104,7 @@ namespace CommunityWiki.Controllers
 
             var markdown = new Markdown();
 
-            var model = article.ToViewModel();
+            var model = _mapper.Map<ArticleViewModel>(article);
             model.IsLoggedIn = _signInManager.IsSignedIn(User);
 
             model.Body = markdown.Transform(model.Body);
@@ -139,8 +142,8 @@ namespace CommunityWiki.Controllers
             }
 
             var model = new CompareRevisionViewModel();
-            model.Article = article.ToModel();
-            model.Revision = revision.ToModel();
+            model.Article = _mapper.Map<ArticleModel>(article);
+            model.Revision = _mapper.Map<ArticleRevisionModel>(revision);
             
             model.DiffModel = _diffBuilder.BuildDiffModel(revision.Body, article.Body);
 
@@ -224,7 +227,7 @@ namespace CommunityWiki.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var model = article.ToEditModel();
+            var model = _mapper.Map<EditArticleViewModel>(article);
 
             return View(model);
         }
@@ -323,7 +326,7 @@ namespace CommunityWiki.Controllers
 
                 await _dbContext.SaveChangesAsync();
 
-                var model = article.ToModel();
+                var model = _mapper.Map<ArticleModel>(article);
                 return Ok(model);
             }
             catch(Exception ex)
@@ -378,7 +381,7 @@ namespace CommunityWiki.Controllers
 
                 result = revisions.Select(x =>
                 {
-                    var rev = x.Revision.ToModel();
+                    var rev = _mapper.Map<ArticleRevisionModel>(x.Revision);
                     rev.RevisionUserName = $"{x.UserFirstName} {x.UserLastName}";
                     return rev;
                 }).ToList();

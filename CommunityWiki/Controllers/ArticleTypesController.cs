@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using CommunityWiki.Data;
 using CommunityWiki.Entities.Articles;
@@ -23,14 +24,17 @@ namespace CommunityWiki.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly ApplicationDbContext _dbContext;
+        private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
         public ArticleTypesController(UserManager<User> userManager,
             ApplicationDbContext dbContext,
+            IMapper mapper,
             ILoggerFactory loggerFactory)
         {
             _userManager = userManager;
             _dbContext = dbContext;
+            _mapper = mapper;
             _logger = loggerFactory.CreateLogger<ArticleTypesController>();
         }
 
@@ -95,7 +99,7 @@ namespace CommunityWiki.Controllers
             if (type == null)
                 return RedirectToAction(nameof(Index));
 
-            var model = type.ToEditModel();
+            var model = _mapper.Map<EditArticleTypeViewModel>(type);
 
             return View(model);
         }

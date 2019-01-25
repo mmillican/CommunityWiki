@@ -10,16 +10,21 @@ using CommunityWiki.Models.Home;
 using Microsoft.EntityFrameworkCore;
 using CommunityWiki.Models.Articles;
 using AutoMapper.QueryableExtensions;
+using AutoMapper;
+using CommunityWiki.Models.ArticleTypes;
 
 namespace CommunityWiki.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly IMapper _mapper;
 
-        public HomeController(ApplicationDbContext dbContext)
+        public HomeController(ApplicationDbContext dbContext,
+            IMapper mapper)
         {
             _dbContext = dbContext;
+            _mapper = mapper;
         }
 
         public async Task<IActionResult> Index()
@@ -34,7 +39,7 @@ namespace CommunityWiki.Controllers
                 .Take(5)
                 .Select(x => new TopArticleTypeModel
                 {
-                    ArticleType = x.Key.ToModel(),
+                    ArticleType = _mapper.Map<ArticleTypeModel>(x.Key),
                     Count = x.Count()
                 });
 
