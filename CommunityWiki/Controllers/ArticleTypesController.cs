@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CommunityWiki.Controllers
 {
-    [Authorize] // TODO: Admin only
+    [Authorize(Policy = Constants.Policies.Admin)]
     [Route("article-types")]
     public class ArticleTypesController : Controller
     {

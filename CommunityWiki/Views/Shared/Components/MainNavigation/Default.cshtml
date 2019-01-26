@@ -6,4 +6,10 @@
     {
         <li><a asp-area="" asp-controller="Articles" asp-action="Index" asp-route-typeSlug="@type.Slug">@type.Name</a></li>
     }
+    @if (Model.IsAdmin)
+    {
+        <li><a asp-area="" asp-controller="ArticleTypes" asp-action="Index">Article Types</a></li>
+        <li><a asp-area="" asp-controller="Users" asp-action="Index">Users</a></li>
+
+    }
 </ul>

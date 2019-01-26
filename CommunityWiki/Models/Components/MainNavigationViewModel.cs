@@ -6,5 +6,7 @@ namespace CommunityWiki.Models.Components
     public class MainNavigationViewModel
     {
         public List<ArticleTypeModel> ArticleTypes { get; set; }
+
+        public bool IsAdmin { get; set; }
     }
 }

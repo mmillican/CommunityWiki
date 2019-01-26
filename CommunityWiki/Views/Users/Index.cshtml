@@ -1,0 +1,53 @@
+﻿@model CommunityWiki.Models.Users.UserListViewModel
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+@if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<table class="table table-condensed table-striped table-hover">
+    <tr>
+        <th style="width: 15%;">Last Name</th>
+        <th style="width: 15%;">First Name</th>
+        <th style="width: 30%;">Email</th>
+        <th style="width: 15%;">Joined</th>
+        <th style="width: 15%;">Approved</th>
+        <th style="width: 10%;"></th>
+    </tr>
+    @foreach (var user in Model.Users)
+    {
+        <tr>
+            <td>@user.LastName</td>
+            <td>@user.FirstName</td>
+            <td>@user.Email</td>
+            <td>@user.JoinedOn.ToShortDateString()</td>
+            <td>
+                @if (user.IsApproved)
+                {
+                    @user.ApprovedOn?.ToString("d")
+                }
+                else
+                {
+                    <i>Not approved</i>
+                    <a asp-action="Approve" asp-route-userId="@user.Id" class="btn btn-link">Approve</a>
+                }
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@user.Id">Edit</a>
+            </td>
+        </tr>
+    }
+</table>

@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using CommunityWiki.Entities.Articles;
+using CommunityWiki.Entities.Users;
 using CommunityWiki.Models.Articles;
 using CommunityWiki.Models.ArticleTypes;
+using CommunityWiki.Models.Users;
 using CommunityWiki.Models.Votes;
 
 namespace CommunityWiki.Models
@@ -26,6 +28,15 @@ namespace CommunityWiki.Models
             CreateMap<ArticleRevision, ArticleRevisionModel>();
 
             CreateMap<Vote, VoteModel>();
+        }
+    }
+
+    public class UserMapProfile : Profile
+    {
+        public UserMapProfile()
+        {
+            CreateMap<User, UserModel>();
+            CreateMap<User, EditUserViewModel>();
         }
     }
 }

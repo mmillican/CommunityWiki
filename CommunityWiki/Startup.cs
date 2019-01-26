@@ -55,6 +55,7 @@ namespace CommunityWiki
 
             services.AddAuthorization(auth =>
             {
+                auth.AddPolicy(Constants.Policies.Admin, policy => policy.RequireRole(Constants.Roles.Admin));
                 auth.AddPolicy(Constants.Policies.ApprovedUser, policy => policy.AddRequirements(new ApprovedUserRequirement()));
             });
 
