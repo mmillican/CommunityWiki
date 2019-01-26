@@ -32,8 +32,7 @@
                     <a href="@Url.ViewArticleLink(article.Id, article.Slug)">@article.Title</a>
                 </h3>
                 <ul class="list-inline">
-                    <li><span class="label label-default">@article.ArticleTypeName</span></li>
-                    <li>Updated @article.UpdatedOn.ToString("d")</li>
+                    <li>Updated @article.UpdatedOn.Humanize()</li>
                 </ul>
             </div>
         </div>
