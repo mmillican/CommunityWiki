@@ -64,6 +64,7 @@ namespace CommunityWiki
 
             services.Configure<SearchConfig>(Configuration.GetSection("Search"));
             services.Configure<UserConfig>(Configuration.GetSection("Users"));
+            services.Configure<ArticleConfig>(Configuration.GetSection("Articles"));
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();

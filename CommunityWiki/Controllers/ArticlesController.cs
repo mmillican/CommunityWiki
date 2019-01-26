@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using CommunityWiki.Config;
 using CommunityWiki.Data;
 using CommunityWiki.Entities.Articles;
 using CommunityWiki.Entities.Users;
@@ -21,6 +22,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace CommunityWiki.Controllers
 {
@@ -37,6 +39,7 @@ namespace CommunityWiki.Controllers
         private readonly IVoteService _voteService;
         private readonly ISideBySideDiffBuilder _diffBuilder;
         private readonly ILogger _logger;
+        private readonly ArticleConfig _articleConfig;
 
         public ArticlesController(UserManager<User> userManager,
             SignInManager<User> signInManager,
@@ -46,7 +49,8 @@ namespace CommunityWiki.Controllers
             ISearchService searchService,
             IVoteService voteService,
             ISideBySideDiffBuilder diffBuilder,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            IOptions<ArticleConfig> articleConfig)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -57,6 +61,7 @@ namespace CommunityWiki.Controllers
             _voteService = voteService;
             _diffBuilder = diffBuilder;
             _logger = loggerFactory.CreateLogger<ArticlesController>();
+            _articleConfig = articleConfig.Value;
         }
 
         [HttpGet("")]
@@ -78,7 +83,8 @@ namespace CommunityWiki.Controllers
 
             var model = new ArticleListViewModel
             {
-                Articles = articles
+                Articles = articles,
+                ArticlesConfig = _articleConfig
             };
 
             if (type != null)
@@ -106,6 +112,7 @@ namespace CommunityWiki.Controllers
 
             var model = _mapper.Map<ArticleViewModel>(article);
             model.IsLoggedIn = _signInManager.IsSignedIn(User);
+            model.ArticlesConfig = _articleConfig;
 
             model.Body = markdown.Transform(model.Body);
             model.Revisions = await BuildArticleRevisionHistory(id);

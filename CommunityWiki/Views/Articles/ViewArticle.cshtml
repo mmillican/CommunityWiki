@@ -22,25 +22,28 @@
     <div class="col-md-3 sidebar">
         @if (Model.IsLoggedIn)
         {
-            <div class="article-voting visible-md visible-lg">
-                <ul class="list-inline">
-                    <li>
-                        <h3 class="article-score">{{ article.score }}</h3>
-                    </li>
-                    <li>
-                        <button v-bind:class="[ { 'btn-success': voting.userHasUpVoted, 'btn-default': !voting.userHasUpVoted } ,'btn btn-vote vote-up' ]" v-on:click="vote('UpVote')">
-                            <span class="glyphicon glyphicon-thumbs-up"></span>
-                            <span class="count">{{ voting.upVoteCount }}</span>
-                        </button>
-                    </li>
-                    <li>
-                        <a href="#" v-bind:class="[ { 'btn-danger': voting.userHasDownVoted, 'btn-default': !voting.userHasDownVoted }, 'btn btn-default btn-vote vote-down' ]" v-on:click="vote('DownVote')">
-                            <span class="glyphicon glyphicon-thumbs-down"></span>
-                            <span class="count">{{ voting.downVoteCount }}</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            if (Model.ArticlesConfig.EnableVoting)
+            {
+                <div class="article-voting visible-md visible-lg">
+                    <ul class="list-inline">
+                        <li>
+                            <h3 class="article-score">{{ article.score }}</h3>
+                        </li>
+                        <li>
+                            <button v-bind:class="[ { 'btn-success': voting.userHasUpVoted, 'btn-default': !voting.userHasUpVoted } ,'btn btn-vote vote-up' ]" v-on:click="vote('UpVote')">
+                                <span class="glyphicon glyphicon-thumbs-up"></span>
+                                <span class="count">{{ voting.upVoteCount }}</span>
+                            </button>
+                        </li>
+                        <li>
+                            <a href="#" v-bind:class="[ { 'btn-danger': voting.userHasDownVoted, 'btn-default': !voting.userHasDownVoted }, 'btn btn-default btn-vote vote-down' ]" v-on:click="vote('DownVote')">
+                                <span class="glyphicon glyphicon-thumbs-down"></span>
+                                <span class="count">{{ voting.downVoteCount }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            }
 
             <div class="article-status-labels visible-md visible-lg">
                 <article-status Article="Model" />

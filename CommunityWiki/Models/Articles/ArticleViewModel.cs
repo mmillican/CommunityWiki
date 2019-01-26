@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CommunityWiki.Config;
 using CommunityWiki.Entities.Articles;
 using CommunityWiki.Models.ArticleTypes;
-using CommunityWiki.Models.Votes;
+using System.Collections.Generic;
 
 namespace CommunityWiki.Models.Articles
 {
@@ -19,6 +16,8 @@ namespace CommunityWiki.Models.Articles
         public ArticleVotingModel Voting { get; set; } = new ArticleVotingModel();
 
         public FlagArticleViewModel Flagging { get; set; } = new FlagArticleViewModel();
+
+        public ArticleConfig ArticlesConfig { get; set; }
     }
 
     public class ArticleVotingModel

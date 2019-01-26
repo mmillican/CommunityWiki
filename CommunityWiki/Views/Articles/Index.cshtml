@@ -21,10 +21,13 @@
     @foreach (var article in Model.Articles)
     {
         <div class="row article">
+        @if (Model.ArticlesConfig.EnableVoting)
+        {
             <div class="col-md-1 score text-center">
                 <h3>@article.Score<br /><small>score</small></h3>
             </div>
-            <div class="col-md-11">
+        }
+            <div class="@(Model.ArticlesConfig.EnableVoting ? "col-md-11" : "col-md-12")">
                 <h3>
                     <a href="@Url.ViewArticleLink(article.Id, article.Slug)">@article.Title</a>
                 </h3>
