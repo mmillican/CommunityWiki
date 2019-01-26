@@ -14,6 +14,7 @@ namespace CommunityWiki.Models
         {
             CreateMap<ArticleType, ArticleTypeModel>();
             CreateMap<ArticleType, EditArticleTypeViewModel>();
+            CreateMap<FieldDefinition, FieldDefinitionModel>();
         }
     }
 

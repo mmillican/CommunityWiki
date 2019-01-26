@@ -5,7 +5,7 @@
 }
 
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form asp-action="Edit" asp-route-id="@Model.Id">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
@@ -25,7 +25,144 @@
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<h3>Field Definitions</h3>
+
+<div id="app-field-defs">
+    <form v-on:submit.prevent="saveField" style="margin-bottom: 10px;">
+        <div id="edit-field" class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="edit-field-name">Name (label)</label>
+                    <input type="text" id="edit-field-name" v-model="editingField.name" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="edit-field-description">Description</label>
+                    <textarea id="edit-field-description" v-model="editingField.description" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-field-order">Display order</label>
+                    <input type="text" id="edit-field-order" v-model="editingField.order" class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="edit-field-type">Type</label>
+                    <select id="edit-field-type" v-model="editingField.fieldType" class="form-control">
+                        <option value="1">Text box</option>
+                        <option value="2">Multi-line text box</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-field-maxLength">Max Length</label>
+                    <input type="text" id="edit-field-maxLength" v-model="editingField.maxLength" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <div class="checkbox">
+                        <label for="edit-field-isRequired">
+                            <input type="checkbox" id="edit-field-isRequired" v-model="editingField.isRequired" />
+                            Required
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save field</button>
+    </form>
+
+    <table class="table table-striped table-hover">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Required</th>
+            <th>Max Length</th>
+            <th></th>
+        </tr>
+        <tr v-for="field in fields">
+            <td>{{ field.name }}</td>
+            <td>{{ field.description }}</td>
+            <td>{{ field.fieldTypeName }}</td>
+            <td>{{ field.isRequired }}</td>
+            <td>{{ field.maxLength }} </td>
+            <td>
+                <button type="button" class="btn btn-link" v-on:click="edit(field)">Edit</button>
+            </td>
+        </tr>
+    </table>
 </div>
 
+@section scripts
+{
+    <partial name="_VueScripts" />
+    <script>
+        var fieldApp = new Vue({
+            el: '#app-field-defs',
+            data: {
+                fields: [],
+                editingField: {
+                    id: 0,
+                    articleTypeId: @Model.Id,
+                    name: null,
+                    description: null,
+                    fieldType: null,
+                    isRequired: false,
+                    maxLength: 0
+                },
+            },
+            created: function () {
+                this.refreshFields();
+                this.resetEditing();
+            },
+            methods: {
+                refreshFields: function () {
+                    var self = this;
+
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', '@Url.Action("Create", "Fields", new { typeId = Model.Id })')  
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+
+                    xhr.onload = function () {
+                        if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+                            self.fields = JSON.parse(xhr.response);
+                        }
+                    }
+
+                    xhr.send();
+                },
+                saveField: function () {
+                    var self = this;
+
+                    var xhr = new XMLHttpRequest();
+                    if (self.editingField.id === 0) {
+                        xhr.open('POST', '@Url.Action("Create", "Fields", new { typeId = Model.Id })')
+                    } else {
+                        xhr.open('PUT', '/api/article-types/@Model.Id/fields/' + self.editingField.id);
+                    }
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+
+                    xhr.onload = function () {
+                        if (xhr.readyState === xhr.DONE && (xhr.status === 200 || xhr.status === 201)) {
+                            self.refreshFields();
+                            self.resetEditing();
+                        }
+                    }
+
+                    var data = JSON.stringify(self.editingField);
+                    xhr.send(data);
+                },
+                edit: function (field) {
+                    this.editingField = field;
+                },
+                resetEditing: function () {
+                    this.editingField.id = 0;
+                    this.editingField.name = null;
+                    this.editingField.description = null;
+                    this.editingField.fieldType = 1; // Text box
+                    this.editingField.isRequired = false;
+                    this.editingField.maxLength = 25;
+                }
+            }
+        });
+    </script>
+}
