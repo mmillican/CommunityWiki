@@ -186,7 +186,8 @@ namespace CommunityWiki.Controllers
                 {
                     FieldId = x.Id,
                     Name = x.Name,
-                    Description = x.Description
+                    Description = x.Description,
+                    FieldType = x.FieldType
                 })
                 .ToListAsync();
 
@@ -262,7 +263,8 @@ namespace CommunityWiki.Controllers
                 {
                     FieldId = x.Id,
                     Name = x.Name,
-                    Description = x.Description
+                    Description = x.Description,
+                    FieldType = x.FieldType
                 })
                 .ToListAsync();
 

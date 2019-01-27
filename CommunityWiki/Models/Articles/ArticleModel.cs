@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CommunityWiki.Entities.Articles;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -52,6 +53,9 @@ namespace CommunityWiki.Models.Articles
         public string Name { get; set; }
         [JsonIgnore]
         public string Description { get; set; }
+
+        [JsonIgnore]
+        public FieldType FieldType { get; set; }
 
         public string Value { get; set; }
     }

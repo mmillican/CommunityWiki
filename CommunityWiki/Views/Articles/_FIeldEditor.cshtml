@@ -1,13 +1,26 @@
-﻿@model CommunityWiki.Models.Articles.EditArticleViewModel
+﻿@using CommunityWiki.Entities.Articles
+@model CommunityWiki.Models.Articles.EditArticleViewModel
 
 <div class="row">
     <div class="col-md-6 article-fields">
         @for (int idx = 0; idx < Model.Fields.Count; idx++)
         {
+            var fieldType = Model.Fields[idx].FieldType;
             <div class="form-group">
                 <label for="@Html.IdFor(x => Model.Fields[idx].Value)">@Model.Fields[idx].Name</label>
-                <input type="text" asp-for="@Model.Fields[idx].Value" class="form-control" />
+                
+                @switch (fieldType)
+                {
+                    case FieldType.TextBox:
+                        <input type="text" asp-for="@Model.Fields[idx].Value" class="form-control" />
+                        break;
+                    case FieldType.MultiLineText:
+                        <textarea asp-for="@Model.Fields[idx].Value" class="form-control"></textarea>
+                        break;
+                }
+
                 <span class="text-muted">@Model.Fields[idx].Description</span>
+
                 <input type="hidden" asp-for="@Model.Fields[idx].FieldId" value="@Model.Fields[idx].FieldId" />
                 <input type="hidden" asp-for="@Model.Fields[idx].Name" value="@Model.Fields[idx].Name" />
             </div>
