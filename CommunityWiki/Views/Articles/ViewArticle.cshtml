@@ -7,6 +7,17 @@
 <div class="row" id="article">
     <div class="col-md-9 main-content">
         <div class="article-body">
+            @if (Model.Fields.Any())
+            {
+                <dl class="dl-horizontal">
+                    @foreach(var field in Model.Fields)
+                    {
+                        <dt style="text-align: left; margin-bottom: 10px;">@field.Name</dt>
+                        <dd>@field.Value</dd>
+                    }
+                </dl>
+            }
+
             @Html.Raw(Model.Body)
 
             @if (Model.IsLoggedIn)

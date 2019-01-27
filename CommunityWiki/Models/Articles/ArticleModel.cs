@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace CommunityWiki.Models.Articles
@@ -38,5 +40,19 @@ namespace CommunityWiki.Models.Articles
         public int UpdatedUserId { get; set; }
         public DateTime? DeletedOn { get; set; }
         public int? DeletedUserId { get; set; }
+
+        public List<ArticleFieldModel> Fields { get; set; } = new List<ArticleFieldModel>();
+    }
+
+
+    public class ArticleFieldModel
+    {
+        public int FieldId { get; set; }
+
+        public string Name { get; set; }
+        [JsonIgnore]
+        public string Description { get; set; }
+
+        public string Value { get; set; }
     }
 }

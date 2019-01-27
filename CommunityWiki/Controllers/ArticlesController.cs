@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace CommunityWiki.Controllers
 {
@@ -117,6 +118,11 @@ namespace CommunityWiki.Controllers
             model.Body = markdown.Transform(model.Body);
             model.Revisions = await BuildArticleRevisionHistory(id);
 
+            if (!string.IsNullOrEmpty(article.PostData))
+            {
+                model.Fields = JsonConvert.DeserializeObject<List<ArticleFieldModel>>(article.PostData);
+            }
+
             var articleVotes = await _voteService.GetVotesForArticle(id);
 
             if (user != null)
@@ -172,6 +178,17 @@ namespace CommunityWiki.Controllers
                 ArticleTypeId = type.Id,
                 ArticleTypeName = type.Name
             };
+            
+            model.Fields = await _dbContext.ArticleTypeFieldDefinitions
+                .Where(x => x.ArticleTypeId == typeId)
+                .OrderBy(x => x.Order)
+                .Select(x => new ArticleFieldModel
+                {
+                    FieldId = x.Id,
+                    Name = x.Name,
+                    Description = x.Description
+                })
+                .ToListAsync();
 
             return View(model);
         }
@@ -198,10 +215,12 @@ namespace CommunityWiki.Controllers
                     UpdatedUserId = user.Id
                 };
 
+                article.PostData = JsonConvert.SerializeObject(model.Fields);
+
                 _dbContext.Articles.Add(article);
                 await _dbContext.SaveChangesAsync();
 
-                _logger.LogInformation($"Article created. ID: {article.Id} / Title: {article.Title}");
+                _logger.LogInformation($"Article created. ID: {article.Id} / Title: {article.Title}");                
 
                 try
                 {
@@ -235,6 +254,26 @@ namespace CommunityWiki.Controllers
             }
 
             var model = _mapper.Map<EditArticleViewModel>(article);
+            
+            model.Fields = await _dbContext.ArticleTypeFieldDefinitions
+                .Where(x => x.ArticleTypeId == article.ArticleTypeId)
+                .OrderBy(x => x.Order)
+                .Select(x => new ArticleFieldModel
+                {
+                    FieldId = x.Id,
+                    Name = x.Name,
+                    Description = x.Description
+                })
+                .ToListAsync();
+
+            if (!string.IsNullOrEmpty(article.PostData))
+            {
+                var fieldData = JsonConvert.DeserializeObject<List<ArticleFieldModel>>(article.PostData);
+                foreach (var field in model.Fields)
+                {
+                    field.Value = fieldData.SingleOrDefault(fv => fv.FieldId == field.FieldId)?.Value;
+                }
+            }
 
             return View(model);
         }
@@ -255,7 +294,9 @@ namespace CommunityWiki.Controllers
 
                 var origBody = article.Body;
                 article.Body = model.Body;
-                
+
+                article.PostData = JsonConvert.SerializeObject(model.Fields);
+
                 article.UpdatedOn = _dateTimeService.GetNowUtc();
                 article.UpdatedUserId = user.Id;
 

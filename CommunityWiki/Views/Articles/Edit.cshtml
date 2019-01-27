@@ -20,6 +20,9 @@
                 <input asp-for="Title" class="form-control" placeholder="What is this article about?" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
+
+            <partial name="_FieldEditor" model="Model" />
+
             <div class="form-group">
                 <div class="wmd-panel">
                     <div id="wmd-button-bar"></div>
