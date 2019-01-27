@@ -222,14 +222,14 @@ namespace CommunityWiki.Controllers
 
                 _logger.LogInformation($"Article created. ID: {article.Id} / Title: {article.Title}");                
 
-                try
-                {
-                    await _searchService.IndexArticle(article);
-                }
-                catch(Exception ex)
-                {
-                    _logger.LogError(ex, $"Error indexing article ID {article.Id}");
-                }
+                //try
+                //{
+                //    await _searchService.IndexArticle(article);
+                //}
+                //catch(Exception ex)
+                //{
+                //    _logger.LogError(ex, $"Error indexing article ID {article.Id}");
+                //}
 
                 var redirUrl = Url.ViewArticleLink(article.Id, article.Slug);
                 return Redirect(redirUrl);
@@ -315,14 +315,14 @@ namespace CommunityWiki.Controllers
 
                 await _dbContext.SaveChangesAsync();
 
-                try
-                {
-                    await _searchService.IndexArticle(article);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Error indexing article ID {article.Id}");
-                }
+                //try
+                //{
+                //    await _searchService.IndexArticle(article);
+                //}
+                //catch (Exception ex)
+                //{
+                //    _logger.LogError(ex, $"Error indexing article ID {article.Id}");
+                //}
                 
                 return Redirect(Url.ViewArticleLink(id, article.Slug));
             }
