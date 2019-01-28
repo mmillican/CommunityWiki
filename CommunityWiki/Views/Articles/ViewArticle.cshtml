@@ -1,7 +1,8 @@
 ﻿@using CommunityWiki.Entities.Articles
 @model CommunityWiki.Models.Articles.ArticleViewModel
 @{
-    ViewData["Title"] = $"{Model.ArticleTypeName}: {Model.Title}";
+    ViewData.SetPageTitle(Model.Title);
+    ViewData.SetSubTitle(Model.ArticleTypeName);
 }
 
 <div class="row" id="article">

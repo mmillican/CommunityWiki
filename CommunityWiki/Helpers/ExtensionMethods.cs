@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -61,5 +62,14 @@ namespace CommunityWiki.Helpers
         public static bool IsNullOrEmpty(this string input) => string.IsNullOrEmpty(input);
 
         public static bool HasValue(this string input) => !IsNullOrEmpty(input);
+
+
+        public const string TitleViewDataKey = "Title";        
+        public static void SetPageTitle(this ViewDataDictionary viewData, string title) => viewData[TitleViewDataKey] = title;
+        public static string GetPageTitle(this ViewDataDictionary viewData) => viewData[TitleViewDataKey] as string;
+
+        public const string SubTitleViewDataKey = "SubTitle";
+        public static void SetSubTitle(this ViewDataDictionary viewData, string subTitle) => viewData[SubTitleViewDataKey] = subTitle;
+        public static string GetPageSubTitle(this ViewDataDictionary viewData) => viewData[SubTitleViewDataKey] as string;
     }
 }
