@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using CommunityWiki.Auth;
+using Amazon.SimpleEmail;
 
 namespace CommunityWiki
 {
@@ -62,12 +63,13 @@ namespace CommunityWiki
             var appAssembly = typeof(Startup).GetTypeInfo().Assembly;
             services.AddAutoMapper(appAssembly);
 
+            services.Configure<EmailConfig>(Configuration.GetSection("Email"));
             services.Configure<SearchConfig>(Configuration.GetSection("Search"));
             services.Configure<UserConfig>(Configuration.GetSection("Users"));
             services.Configure<ArticleConfig>(Configuration.GetSection("Articles"));
 
             // Add application services.
-            services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<IEmailSender, AmazonSesEmailSender>();
             services.AddTransient<IDateTimeService, DateTimeService>();
             services.AddTransient<IVoteService, VoteService>();
             services.AddTransient<IDiffer, Differ>();
@@ -81,6 +83,9 @@ namespace CommunityWiki
             services.AddLogging(builder => builder
                 .AddConfiguration(Configuration)
                 .AddConsole());
+
+            services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
+            services.AddAWSService<IAmazonSimpleEmailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
