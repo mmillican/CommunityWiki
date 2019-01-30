@@ -14,8 +14,6 @@ var regex = {
     js: /\.js$/
 };
 
-gulp.task("min", ["min:js", "min:css"]);
-
 gulp.task('sass', function () {
     return gulp.src('wwwroot/sass/**/*.scss')
         .pipe(sass({
@@ -64,6 +62,8 @@ gulp.task("watch", function () {
 
     gulp.watch('wwwroot/sass/**/*.scss', ['sass']);
 });
+
+gulp.task("min", gulp.series("min:js", "min:css"));
 
 function getBundles(regexPattern) {
     return bundleconfig.filter(function (bundle) {

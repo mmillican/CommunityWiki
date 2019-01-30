@@ -2,6 +2,11 @@
 @import "layout";
 @import "markdown-editor";
 
+dl.horizontal {
+    &dt, &dd { margin-bottom: 5px; }
+    &dt { text-align: left; }
+}
+
 /* Carousel */
 .carousel-caption p {
     font-size: 20px;
