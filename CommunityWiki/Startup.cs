@@ -54,6 +54,13 @@ namespace CommunityWiki
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddAuthentication()
+                .AddGoogle(google =>
+                {
+                    google.ClientId = Configuration["Auth:Google:ClientId"];
+                    google.ClientSecret = Configuration["Auth:Google:ClientSecret"];
+                });
+
             services.AddAuthorization(auth =>
             {
                 auth.AddPolicy(Constants.Policies.Admin, policy => policy.RequireRole(Constants.Roles.Admin));
