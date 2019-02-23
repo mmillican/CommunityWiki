@@ -69,11 +69,20 @@
                     <th style="width: 10%">Date</th>
                     <th style="width: 10%"></th>
                 </tr>
-                @foreach (var rev in Model.Revisions)
+                @{ 
+                    var maxRevisionDisplayCount = 5;
+                }
+                @foreach (var rev in Model.Revisions.Take(maxRevisionDisplayCount))
                 {
                     <tr title="@rev.Comment by @rev.RevisionUserName">
                         <td>@rev.RevisionDate.ToString("d")</td>
                         <td><a asp-action="CompareRevision" asp-route-articleId="@Model.Id" asp-route-revisionId="@rev.Id">Compare</a></td>
+                    </tr>
+                }
+                @if (Model.RevisionCount > maxRevisionDisplayCount)
+                {
+                    <tr>
+                        <td colspan="2"><i>@(Model.RevisionCount - maxRevisionDisplayCount) more revisions...</i></td>
                     </tr>
                 }
             </table>
