@@ -119,6 +119,8 @@ namespace CommunityWiki.Controllers
 
             var model = _mapper.Map<ArticleViewModel>(article);
             model.IsUserApproved = (await _authorizationService.AuthorizeAsync(User, Constants.Policies.ApprovedUser)).Succeeded;
+            model.CanUserPublish = model.IsUserApproved && article.CreatedUserId != user.Id;
+
             model.ArticlesConfig = _articleConfig;
 
             model.Body = markdown.Transform(model.Body);

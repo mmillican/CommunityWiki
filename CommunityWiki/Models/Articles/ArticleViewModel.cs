@@ -8,6 +8,7 @@ namespace CommunityWiki.Models.Articles
     public class ArticleViewModel : ArticleModel
     {
         public bool IsUserApproved { get; set; }
+        public bool CanUserPublish { get; set; }
 
         public ArticleTypeModel ArticleType { get; set; }
 

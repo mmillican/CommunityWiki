@@ -29,6 +29,12 @@
                 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
 
                 <button id="btn-flag-article" type="button" class="btn btn-default btn-flag-article" title="Report this this article" data-toggle="modal" data-target="#article-flag-modal"><span class="glyphicon glyphicon-flag"></span> Report</button>
+                
+
+                @if (!Model.PublishedOn.HasValue && Model.CanUserPublish)
+                {
+                    <button type="submit" id="btn-publish-article" class="btn btn-info" v-on:click="publish()" v-if="!article.publishedOn">Publish Article</button>
+                }
             </div>
 
             if (Model.ArticlesConfig.EnableVoting)
@@ -54,9 +60,9 @@
                 </div>
             }
 
-            <div class="article-status-labels visible-md visible-lg">
+            @*<div class="article-status-labels visible-md visible-lg">
                 <article-status Article="Model" />
-            </div>
+            </div>*@
 
             <hr />
             <h4>Revisions (@Model.RevisionCount)</h4>
@@ -167,6 +173,7 @@
                     revisionCount: @Model.RevisionCount,
                     isFlaggedForReview: @Model.IsFlaggedForReview.ToJsBoolean(),
                     isFlaggedForDeletion: @Model.IsFlaggedForDeletion.ToJsBoolean(),
+                    publishedOn: '@Model.PublishedOn',
                     score: @Model.Score
                 },
                 voting: {
@@ -258,6 +265,24 @@
                     };
 
                     xhr.send(JSON.stringify(data));
+                },
+                publish: function () {
+                    var self = this;
+
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '@Url.Action("Publish", new { articleId = Model.Id })');
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+
+                    xhr.onload = function () {
+                        if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+                            wiki.notices.addSuccess('This article has been published.');
+                            self.article.publishedOn = new Date();
+                        } else if (xhr.readyState === xhr.DONE) {
+                            wiki.notices.addError('There was an error publishing the article.  Please try again.', null, 0);
+                        }
+                    };
+
+                    xhr.send();
                 },
                 flag: function () {
                     var self = this;
