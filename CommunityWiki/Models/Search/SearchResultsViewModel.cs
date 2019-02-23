@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using CommunityWiki.Entities.Articles;
+﻿using CommunityWiki.Models.Articles;
+using System.Collections.Generic;
 
 namespace CommunityWiki.Models.Search
 {
@@ -9,6 +9,6 @@ namespace CommunityWiki.Models.Search
 
         public int ResultCount { get; set; }
 
-        public List<Article> Articles { get; set; } = new List<Article>();
+        public List<ArticleModel> Articles { get; set; } = new List<ArticleModel>();
     }
 }

@@ -25,7 +25,7 @@ else if (Model.ResultCount > 0)
     {
         <div class="result article">
             <h3>
-                <a href="@Url.ViewArticleLink(result.Id, result.ArticleType.Slug, result.Slug)">@result.Title</a>
+                <a href="@Url.ViewArticleLink(result.Id, result.ArticleTypeSlug, result.Slug)">@result.Title</a>
             </h3>
             <p>@result.Body.Truncate(100, "...")</p>
         </div>
