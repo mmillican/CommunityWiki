@@ -33,6 +33,7 @@ namespace CommunityWiki.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly IAuthorizationService _authorizationService;
         private readonly ApplicationDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly IDateTimeService _dateTimeService;
@@ -44,6 +45,7 @@ namespace CommunityWiki.Controllers
 
         public ArticlesController(UserManager<User> userManager,
             SignInManager<User> signInManager,
+            IAuthorizationService authorizationService,
             ApplicationDbContext dbContext,
             IMapper mapper,
             IDateTimeService dateTimeService,
@@ -55,6 +57,7 @@ namespace CommunityWiki.Controllers
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _authorizationService = authorizationService;
             _dbContext = dbContext;
             _mapper = mapper;
             _dateTimeService = dateTimeService;
@@ -65,6 +68,7 @@ namespace CommunityWiki.Controllers
             _articleConfig = articleConfig.Value;
         }
 
+        [AllowAnonymous]
         [HttpGet("")]
         [HttpGet("{typeSlug}")]
         public async Task<IActionResult> Index(string typeSlug = null)
@@ -87,6 +91,8 @@ namespace CommunityWiki.Controllers
                 Articles = articles,
                 ArticlesConfig = _articleConfig
             };
+
+            model.IsUserApproved = (await _authorizationService.AuthorizeAsync(User, Constants.Policies.ApprovedUser)).Succeeded;
 
             if (type != null)
             {
@@ -112,7 +118,7 @@ namespace CommunityWiki.Controllers
             var markdown = new Markdown();
 
             var model = _mapper.Map<ArticleViewModel>(article);
-            model.IsLoggedIn = _signInManager.IsSignedIn(User);
+            model.IsUserApproved = (await _authorizationService.AuthorizeAsync(User, Constants.Policies.ApprovedUser)).Succeeded;
             model.ArticlesConfig = _articleConfig;
 
             model.Body = markdown.Transform(model.Body);

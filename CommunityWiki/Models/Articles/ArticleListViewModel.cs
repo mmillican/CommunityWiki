@@ -11,5 +11,7 @@ namespace CommunityWiki.Models.Articles
         public List<ArticleModel> Articles { get; set; }
 
         public ArticleConfig ArticlesConfig { get; set; }
+
+        public bool IsUserApproved { get; set; }
     }
 }

@@ -20,20 +20,17 @@
             }
 
             @Html.Raw(Model.Body)
-
-            @if (Model.IsLoggedIn)
-            {
-                <div class="actions article-actions">
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
-
-                    <button id="btn-flag-article" type="button" class="btn btn-default btn-flag-article" title="Report this this article" data-toggle="modal" data-target="#article-flag-modal"><span class="glyphicon glyphicon-flag"></span> Report</button>
-                </div>
-            }
         </div>
     </div>
     <div class="col-md-3 sidebar">
-        @if (Model.IsLoggedIn)
+        @if (Model.IsUserApproved)
         {
+            <div class="actions article-actions">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
+
+                <button id="btn-flag-article" type="button" class="btn btn-default btn-flag-article" title="Report this this article" data-toggle="modal" data-target="#article-flag-modal"><span class="glyphicon glyphicon-flag"></span> Report</button>
+            </div>
+
             if (Model.ArticlesConfig.EnableVoting)
             {
                 <div class="article-voting visible-md visible-lg">
@@ -98,7 +95,7 @@
 
 
 
-    @if (Model.IsLoggedIn)
+    @if (Model.IsUserApproved)
     {
         <div id="article-flag-modal" class="modal fade" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
@@ -160,7 +157,7 @@
         var articleApp = new Vue({
             el: '#article',
             data: {
-                isLoggedIn: @Model.IsLoggedIn.ToJsBoolean(),
+                isLoggedIn: @Model.IsUserApproved.ToJsBoolean(),
                 article: {
                     id: @Model.Id,
                     typeId: @Model.ArticleTypeId,

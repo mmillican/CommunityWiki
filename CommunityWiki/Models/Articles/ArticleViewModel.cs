@@ -7,7 +7,7 @@ namespace CommunityWiki.Models.Articles
 {
     public class ArticleViewModel : ArticleModel
     {
-        public bool IsLoggedIn { get; set; }
+        public bool IsUserApproved { get; set; }
 
         public ArticleTypeModel ArticleType { get; set; }
 

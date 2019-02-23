@@ -3,19 +3,21 @@
     ViewData["Title"] = (Model.Type?.Name ?? "Articles");
 }
 
-@* TODO: only show add/edit if authd *@
-<div class="actions clearfix">
-    <a asp-action="Create" asp-route-typeId="@Model.Type.Id" class="btn btn-success pull-left">New article</a>
+@if (Model.IsUserApproved)
+{
+    <div class="actions clearfix">
+        <a asp-action="Create" asp-route-typeId="@Model.Type.Id" class="btn btn-success pull-left">New article</a>
 
-    <div class="btn-group pull-right">
-        <button type="button" class="btn btn-default dropdown-toggle btn-review-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Review <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-            <li><a asp-action="Review" asp-route-queue="publish">Publish</a></li>
-        </ul>
+        <div class="btn-group pull-right">
+            <button type="button" class="btn btn-default dropdown-toggle btn-review-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Review <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a asp-action="Review" asp-route-queue="publish">Publish</a></li>
+            </ul>
+        </div>
     </div>
-</div>
+}
 
 <div class="article-list">
     @foreach (var article in Model.Articles)
