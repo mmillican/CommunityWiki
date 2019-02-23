@@ -97,8 +97,8 @@ namespace CommunityWiki.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("{id}/{slug}")]
-        public async Task<IActionResult> ViewArticle(int id, string slug)
+        [HttpGet("{typeSlug}/{slug}/{id}")]
+        public async Task<IActionResult> ViewArticle(int id, string typeSlug, string slug)
         {
             var article = await _dbContext.Articles.Include(x => x.ArticleType).SingleOrDefaultAsync(x => x.Id == id);
             if (article == null || article.DeletedOn.HasValue)
@@ -232,7 +232,7 @@ namespace CommunityWiki.Controllers
                 //    _logger.LogError(ex, $"Error indexing article ID {article.Id}");
                 //}
 
-                var redirUrl = Url.ViewArticleLink(article.Id, article.Slug);
+                var redirUrl = Url.ViewArticleLink(article.Id, type.Slug, article.Slug);
                 return Redirect(redirUrl);
             }
             catch(Exception ex)
@@ -288,6 +288,7 @@ namespace CommunityWiki.Controllers
             try
             {
                 var article = await _dbContext.Articles.FindAsync(id);
+                var articleType = await _dbContext.ArticleTypes.FindAsync(article.ArticleTypeId);
 
                 var origTitle = article.Title;
                 article.Title = model.Title;
@@ -326,7 +327,7 @@ namespace CommunityWiki.Controllers
                 //    _logger.LogError(ex, $"Error indexing article ID {article.Id}");
                 //}
                 
-                return Redirect(Url.ViewArticleLink(id, article.Slug));
+                return Redirect(Url.ViewArticleLink(id, articleType.Slug, article.Slug));
             }
             catch (Exception ex)
             {

@@ -29,7 +29,7 @@
         }
             <div class="@(Model.ArticlesConfig.EnableVoting ? "col-md-11" : "col-md-12")">
                 <h3>
-                    <a href="@Url.ViewArticleLink(article.Id, article.Slug)">@article.Title</a>
+                    <a href="@Url.ViewArticleLink(article.Id, Model.Type.Slug, article.Slug)">@article.Title</a>
                 </h3>
                 <ul class="list-inline">
                     <li>Updated @article.UpdatedOn.Humanize()</li>

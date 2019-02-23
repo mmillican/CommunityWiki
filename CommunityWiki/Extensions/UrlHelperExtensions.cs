@@ -26,9 +26,9 @@ namespace Microsoft.AspNetCore.Mvc
                 protocol: scheme);
         }
 
-        public static string ViewArticleLink(this IUrlHelper urlHelper, int articleId, string slug)
+        public static string ViewArticleLink(this IUrlHelper urlHelper, int articleId, string typeSlug, string slug)
         {
-            return urlHelper.Action(nameof(ArticlesController.ViewArticle), "Articles", new { id = articleId, slug });
+            return urlHelper.Action(nameof(ArticlesController.ViewArticle), "Articles", new { id = articleId, typeSlug, slug });
         }
     }
 }

@@ -20,7 +20,7 @@
                 }
             </td>
             <td>
-                <a href="@Url.ViewArticleLink(article.Id, article.Slug)">@article.Title</a>
+                <a href="@Url.ViewArticleLink(article.Id, article.ArticleTypeSlug, article.Slug)">@article.Title</a>
             </td>
             <td>@article.UpdatedOn.ToString("g")</td>
         </tr>

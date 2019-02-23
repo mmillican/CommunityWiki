@@ -12,6 +12,7 @@ namespace CommunityWiki.Models.Articles
 
         public int ArticleTypeId { get; set; }
         public string ArticleTypeName { get; set; }
+        public string ArticleTypeSlug { get; set; }
         
         public int? ParentId { get; set; }
 
