@@ -7,6 +7,7 @@ using AutoMapper.QueryableExtensions;
 using CommunityWiki.Data;
 using CommunityWiki.Entities.Articles;
 using CommunityWiki.Entities.Users;
+using CommunityWiki.Helpers;
 using CommunityWiki.Models;
 using CommunityWiki.Models.ArticleTypes;
 using Microsoft.AspNetCore.Authorization;
@@ -75,8 +76,9 @@ namespace CommunityWiki.Controllers
                 var type = new ArticleType
                 {
                     Name = model.Name,
-                    Description = model.Description
+                    Description = model.Description,
                 };
+                type.Slug = await GenerateSlugAsync(type.Name);
 
                 _dbContext.ArticleTypes.Add(type);
                 await _dbContext.SaveChangesAsync();
@@ -129,5 +131,28 @@ namespace CommunityWiki.Controllers
                 return View(model);
             }
         }
+
+        private async Task<string> GenerateSlugAsync(string title)
+        {
+            var slug = title.Slugify();
+
+            if (!await DoesSlugExistAsync(slug))
+            {
+                return slug;
+            }
+
+            var baseSlug = slug;
+            var idx = 1;
+            slug = $"{baseSlug}-{idx}";
+            while(await DoesSlugExistAsync(slug))
+            {
+                idx++;
+                slug = $"{baseSlug}-{idx}";
+            }
+
+            return slug;
+        }
+
+        private Task<bool> DoesSlugExistAsync(string slug) => _dbContext.Articles.AnyAsync(x => x.Slug == slug);
     }
 }
