@@ -15,7 +15,7 @@
                         <input type="text" asp-for="@Model.Fields[idx].Value" class="form-control" />
                         break;
                     case FieldType.MultiLineText:
-                        <textarea asp-for="@Model.Fields[idx].Value" class="form-control"></textarea>
+                        <textarea asp-for="@Model.Fields[idx].Value" class="form-control" rows="5"></textarea>
                         break;
                 }
 
