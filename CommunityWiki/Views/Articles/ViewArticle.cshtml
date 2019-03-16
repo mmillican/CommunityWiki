@@ -14,7 +14,7 @@
                     @foreach(var field in Model.Fields)
                     {
                         <dt style="text-align: left; margin-bottom: 10px;">@field.Name</dt>
-                        <dd>@Html.Raw(field.Value.Replace("\n", "<br />"))</dd>
+                        <dd>@Html.Raw(field.Value?.Replace("\n", "<br />"))</dd>
                     }
                 </dl>
             }
